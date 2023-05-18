@@ -1,12 +1,13 @@
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from .models import Owner
 from .serializers import OwnerSerializer
 from json import loads, dumps
 
 def show(request, id):
 	owner = Owner.objects.get(id=id)
-	return JsonResponse(owner, safe=False)
-
+	return JsonResponse(owner.__to_lib__, safe=False)
+@csrf_exempt
 def create(request):
 	owner = loads(request.body)
 	serializer = OwnerSerializer(data=owner)
@@ -14,7 +15,7 @@ def create(request):
 		serializer.save()
 		return JsonResponse(serializer.data, safe=False)
 	return JsonResponse(serializer.errors, safe=False)
-
+@csrf_exempt
 def update(request, id):
 	owner = Owner.objects.get(id=id)
 	updated_owner = loads(request.body)
@@ -23,7 +24,7 @@ def update(request, id):
 		serializer.save()
 		return JsonResponse(serializer.data, safe=False)
 	return JsonResponse(serializer.errors, safe=False)
-
+@csrf_exempt
 def delete(request, id):
 	owner = Owner.objects.get(id=id)
 	owner.delete()

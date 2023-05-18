@@ -1,4 +1,5 @@
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from .models import Animal
 from .serializers import AnimalSerializer
 from json import loads, dumps
@@ -6,7 +7,7 @@ from json import loads, dumps
 def show(request, id):
 	animal = Animal.objects.get(id=id)
 	return JsonResponse(animal, safe=False)
-
+@csrf_exempt
 def create(request):
 	animal = loads(request.body)
 	serializer = AnimalSerializer(data=animal)
@@ -14,7 +15,7 @@ def create(request):
 		serializer.save()
 		return JsonResponse(serializer.data, safe=False)
 	return JsonResponse(serializer.errors, safe=False)
-
+@csrf_exempt
 def update(request, id):
 	animal = Animal.objects.get(id=id)
 	updated_animal = loads(request.body)
@@ -23,7 +24,7 @@ def update(request, id):
 		serializer.save()
 		return JsonResponse(serializer.data, safe=False)
 	return JsonResponse(serializer.errors, safe=False)
-
+@csrf_exempt
 def delete(request, id):
 	animal = Animal.objects.get(id=id)
 	animal.delete()
