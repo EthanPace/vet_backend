@@ -5,10 +5,25 @@ from .serializers import OwnerSerializer
 from json import loads, dumps
 
 
-def show(request, id):
-    owner = Owner.objects.get(id=id)
-    return JsonResponse(owner.to_dict(), safe=False)
+# def show(request, id):
+#     owner = Owner.objects.get(id=id)
+#     return JsonResponse(owner.to_dict(), safe=False)
 
+def show(request, id=None):
+    if id:
+        # Retrieve a single owner by ID
+        owner = Owner.objects.get(id=id)
+        return JsonResponse(owner.to_dict(), safe=False)
+    else:
+        # Retrieve all owners
+        owners = Owner.objects.all()
+        owners_list = [owner.to_dict() for owner in owners]
+        return JsonResponse(owners_list, safe=False)
+
+def show_all_owners(request):
+    owners = Owner.objects.all()
+    owners_list = [owner.to_dict() for owner in owners]
+    return JsonResponse(owners_list, safe=False)
 
 @csrf_exempt
 def create(request):

@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path('', views.show_all_owners, name='show_all_owners'),
     path('<int:id>/', views.show),
     path('create/', views.create),
     path('update/<int:id>/', views.update),
