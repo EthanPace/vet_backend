@@ -4,9 +4,20 @@ from .models import Animal
 from .serializers import AnimalSerializer
 from json import loads, dumps
 
+# def show(request, id):
+# 	animal = Animal.objects.get(id=id)
+# 	return JsonResponse(animal, safe=False)
+
 def show(request, id):
-	animal = Animal.objects.get(id=id)
-	return JsonResponse(animal, safe=False)
+    animal = Animal.objects.get(id=id)
+    serializer = AnimalSerializer(animal)
+    return JsonResponse(serializer.data, safe=False)
+
+def show_all(request):
+    animals = Animal.objects.all()
+    serializer = AnimalSerializer(animals, many=True)
+    return JsonResponse(serializer.data, safe=False)
+
 @csrf_exempt
 def create(request):
 	animal = loads(request.body)
