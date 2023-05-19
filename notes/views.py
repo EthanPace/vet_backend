@@ -4,9 +4,25 @@ from .models import Note
 from .serializers import NoteSerializer
 from json import loads, dumps
 
+# def show(request, id):
+#     note = Note.objects.get(id=id)
+#     return JsonResponse(note.to_dict(), safe=False)
+
 def show(request, id):
-	note = Note.objects.get(id=id)
-	return JsonResponse(note, safe=False)
+    note = Note.objects.get(id=id)
+    serializer = NoteSerializer(note)
+    return JsonResponse(serializer.data, safe=False)
+
+# def show_all(request):
+#     notes = Note.objects.all()
+#     serialized_notes = [note.to_dict() for note in notes]
+#     return JsonResponse(serialized_notes, safe=False)
+
+def show_all(request):
+    notes = Note.objects.all()
+    serializer = NoteSerializer(notes, many=True)
+    return JsonResponse(serializer.data, safe=False)
+
 @csrf_exempt
 def create(request):
 	note = loads(request.body)
