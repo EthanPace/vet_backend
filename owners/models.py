@@ -6,7 +6,6 @@ class Owner(models.Model):
 	last_name = models.CharField(max_length=50)
 	phone_number = models.IntegerField()
 	email = models.EmailField()
-	address = models.CharField(max_length=50)
 	availability = models.CharField(max_length=255)
 
 	staff = models.BooleanField(default=False)
