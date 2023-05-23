@@ -6,12 +6,16 @@ from json import loads
 # Index
 # Takes no arguments
 # Returns an overview of all visits
-# TODO: Add pagination
 # TODO: Add Authorization
 # TODO: Test this
 def index(request):
 	if request.method == 'GET':
-		visits = Visit.objects.all()
+		if 'page' in request.GET:
+			page = int(request.GET['page', 1])
+			page_size = int(request.GET['page_size', 10])
+			visits = Visit.objects.all()[(page - 1) * page_size:page * page_size]
+		else:
+			visits = Visit.objects.all()
 		serializer = VisitSerializer(visits, many=True)
 		return overview(serializer.data)
 	else:

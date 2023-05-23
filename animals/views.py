@@ -6,12 +6,16 @@ from json import loads
 # Index
 # Takes no arguments
 # Returns an overview of all animals
-# TODO: Add pagination
 # TODO: Add Authorization
 # TODO: Test this
 def index(request):
 	if request.method == 'GET':
-		animals = Animal.objects.all()
+		if 'page' in request.GET:
+			page = int(request.GET['page', 1])
+			page_size = int(request.GET['page_size', 10])
+			animals = Animal.objects.all()[(page - 1) * page_size:page * page_size]
+		else:
+			animals = Animal.objects.all()
 		serializer = AnimalSerializer(animals, many=True)
 		return overview(serializer.data)
 	else:

@@ -6,11 +6,18 @@ from json import loads
 # Index
 # Takes no arguments
 # Returns an overview of all owners
-# TODO: Add pagination
 def index(request):
-	owners = Owner.objects.all()
-	serializer = OwnerSerializer(owners, many=True)
-	return overview(serializer.data)
+	if request.method == 'GET':
+		if 'page' in request.GET:
+			page = int(request.GET['page', 1])
+			page_size = int(request.GET['page_size', 10])
+			owners = Owner.objects.all()[(page - 1) * page_size:page * page_size]
+		else:
+			owners = Owner.objects.all()
+		serializer = OwnerSerializer(owners, many=True)
+		return overview(serializer.data)
+	else:
+		return JsonResponse({'error': 'This endpoint only accepts GET requests.'})
 # Details
 # Takes an id as part of the endpoint
 # Returns the full details of the owner with the given id
