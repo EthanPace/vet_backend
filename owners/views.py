@@ -3,9 +3,11 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Owner
 from .serializers import OwnerSerializer
 from json import loads
+from animals.models import Animal
 # Index
 # Takes no arguments
 # Returns an overview of all owners
+# TODO: Test this
 def index(request):
 	if request.method == 'GET':
 		if 'page' in request.GET:
@@ -23,12 +25,15 @@ def index(request):
 # Returns the full details of the owner with the given id
 # TODO: figure out what this does
 def details(request, id):
-	owner = Owner.objects.filter(id=id)
-	if owner:
-		serializer = OwnerSerializer(owner[0])
-		return JsonResponse(serializer.data, safe=False)
+	if request.method == 'GET':
+		owner = Owner.objects.filter(id=id)
+		if owner:
+			serializer = OwnerSerializer(owner[0])
+			return JsonResponse(find_pets(serializer.data), safe=False)
+		else:
+			return JsonResponse({'error': 'No owner found with that id.'})
 	else:
-		return JsonResponse({'error': 'No owner found with that id.'})
+		return JsonResponse({'error': 'This endpoint only accepts GET requests.'})
 # Search
 # Takes a search term and search text as part of the request body
 # Returns a list of owners matching the search term and search text
@@ -71,7 +76,7 @@ def edit(request, id):
 		data = loads(request.body)
 		owner = Owner.objects.filter(id=id)
 		if owner:
-			owner.update(name=data['name'], age=data['age'], species=data['species'], breed=data['breed'], color=data['color'], weight=data['weight'], height=data['height'], description=data['description'])
+			owner.update(first_name=data['first_name'], last_name=data['last_name'], phone_number=data['phone_number'], email=data['email'], availability=data['availability'], staff=data['staff'])
 			return JsonResponse({'id': owner[0].id})
 		else:
 			return JsonResponse({'error': 'No owner found with that id.'})
@@ -107,3 +112,10 @@ def overview(data):
 			'email': datum['email'],
 		})
 	return JsonResponse(overview, safe=False)
+# Find Pets
+# Takes an owner
+# Returns the owner with an embedded list of their pets
+def find_pets(owner):
+	pets = Animal.objects.filter(owner=owner['id'])
+	owner['pets'] = pets
+	return owner

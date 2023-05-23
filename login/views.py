@@ -13,12 +13,18 @@ from hashlib import sha256
 @csrf_exempt
 def login(request):
 	if request.method == 'POST':
-		data = loads(request.body)
-		user = User.objects.filter(username=data['username'], password=hash(data['password']))
-		if user:
-			return JsonResponse({'id': user[0].id, 'role': user[0].role})
+		if request.session['logged_in'] != True:
+			data = loads(request.body)
+			user = User.objects.filter(username=data['username'], password=hash(data['password']))
+			if user:
+				request.session['logged_in'] = True
+				request.session['user_id'] = user[0].id
+				request.session['user_role'] = user[0].role
+				return JsonResponse({'id': user[0].id, 'role': user[0].role})
+			else:
+				return JsonResponse({'error': 'No user found with that username and password.'})
 		else:
-			return JsonResponse({'error': 'No user found with that username and password.'})
+			return JsonResponse({'error': 'A user is already logged in.'})
 	else:
 		return JsonResponse({'error': 'This endpoint only accepts POST requests.'})
 # Logout
@@ -26,7 +32,11 @@ def login(request):
 # Returns a success message
 # TODO: add session management
 def logout(request):
-	return JsonResponse({'error': 'This endpoint is not implemented yet'})
+	if request.session['logged_in']:
+		request.session.flush()
+		return JsonResponse({'success': 'User logged out successfully.'})
+	else:
+		return JsonResponse({'error': 'No user logged in.'})
 # Register
 # Add functionality for users
 # Takes a username and password as part of the request body

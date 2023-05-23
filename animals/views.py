@@ -3,6 +3,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Animal
 from .serializers import AnimalSerializer
 from json import loads
+from visits.models import Visit
 # Index
 # Takes no arguments
 # Returns an overview of all animals
@@ -30,7 +31,7 @@ def details(request, id):
 		animal = Animal.objects.filter(id=id)
 		if animal:
 			serializer = AnimalSerializer(animal[0])
-			return JsonResponse(serializer.data, safe=False)
+			return JsonResponse(find_visits(serializer.data), safe=False)
 		else:
 			return JsonResponse({'error': 'No animal found with that id.'})
 	else:
@@ -80,7 +81,7 @@ def edit(request, id):
 		data = loads(request.body)
 		animal = Animal.objects.filter(id=id)
 		if animal:
-			animal.update(name=data['name'], age=data['age'], species=data['species'], breed=data['breed'], color=data['color'], weight=data['weight'], height=data['height'], description=data['description'])
+			animal.update(name=data['name'], species=data['species'], breed=data['breed'], color=data['color'], sex=data['sex'], DOB=data['DOB'], weight=data['weight'], vaccination_status=data['vaccination_status'], last_vaccination_date=data['last_vaccination_date'], next_vaccination_date=data['next_vaccination_date'], desexed=data['desexed'], microchip_number=data['microchip_number'])
 			return JsonResponse({'id': animal[0].id})
 		else:
 			return JsonResponse({'error': 'No animal found with that id.'})
@@ -111,13 +112,15 @@ def overview(animals):
 	overview = []
 	for animal in animals:
 		overview.append({
-			'id': animal['id'],
-			'name': animal['name'],
-			'species': animal['species'],
-			'breed': animal['breed'],
-			'color': animal['color'],
-			'weight': animal['weight'],
-			'height': animal['height'],
-			'description': animal['description']
+			"name":animal['name'], 
+			"species":animal['species']
 		})
 	return JsonResponse(overview, safe=False)
+# Find Visits
+# Takes an animal
+# Returns a list of visits for that animal
+# TODO: Test this
+def find_visits(animal):
+	visits = Visit.objects.filter(animal=animal['id'])
+	animal['visits'] = visits
+	return animal

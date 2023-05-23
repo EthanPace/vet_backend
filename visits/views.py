@@ -3,6 +3,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Visit
 from .serializers import VisitSerializer
 from json import loads
+from animals.models import Animal
 # Index
 # Takes no arguments
 # Returns an overview of all visits
@@ -30,7 +31,7 @@ def details(request, id):
 		visit = Visit.objects.filter(id=id)
 		if visit:
 			serializer = VisitSerializer(visit[0])
-			return JsonResponse(serializer.data, safe=False)
+			return JsonResponse(find_animal(serializer.data), safe=False)
 		else:
 			return JsonResponse({'error': 'No visit found with that id.'})
 	else:
@@ -80,7 +81,7 @@ def edit(request, id):
 		data = loads(request.body)
 		visit = Visit.objects.filter(id=id)
 		if visit:
-			visit.update(name=data['name'], age=data['age'], species=data['species'], breed=data['breed'], color=data['color'], weight=data['weight'], height=data['height'], description=data['description'])
+			visit.update()
 			return JsonResponse({'id': visit[0].id})
 		else:
 			return JsonResponse({'error': 'No visit found with that id.'})
@@ -113,7 +114,13 @@ def overview(data):
 		overview.append({
 			'id': datum['id'],
 			'date_time': datum['date_time'],
-			'animal_name': datum['animal']['name'],
-			'animal_species': datum['animal']['species'],
 		})
 	return JsonResponse(overview, safe=False)
+# Find Animal
+# Takes a visit
+# Returns the animal associated with the visit
+def find_animal(data):
+	animal = Animal.objects.filter(id=data['animal'])
+	if animal:
+		data['animal'] = animal[0]
+	return data

@@ -2,7 +2,8 @@ from django.db import models
 
 class Animal(models.Model):
 	id = models.AutoField(primary_key=True)
-	client = models.ForeignKey('clients.Client', on_delete=models.CASCADE)
+
+	owner = models.ForeignKey('owners.Owner', on_delete=models.CASCADE)
 
 	name = models.CharField(max_length=50)
 	species = models.CharField(max_length=50)
