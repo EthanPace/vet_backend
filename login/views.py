@@ -7,9 +7,7 @@ from hashlib import sha256
 # Login
 # Takes a username and password as part of the request body
 # Returns the id and role of the user with the given username and password
-# TODO: Add Authorization and session management
-# TODO: Add password hashing
-# TODO: Test this
+# TODO: Add Authorization
 @csrf_exempt
 def login(request):
 	if request.method == 'POST':
@@ -26,8 +24,7 @@ def login(request):
 		return JsonResponse({'error': 'This endpoint only accepts POST requests.'})
 # Logout
 # Takes no arguments
-# Returns a success message
-# TODO: add session management
+# Returns a success message if the user was logged out successfully
 def logout(request):
 	if request.session['logged_in']:
 		request.session.flush()

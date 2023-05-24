@@ -36,19 +36,6 @@ def details(request, id):
 			return JsonResponse({'error': 'No visit found with that id.'})
 	else:
 		return JsonResponse({'error': 'This endpoint only accepts GET requests.'})
-# Search
-# Takes a search term and search text as part of the request body
-# Returns a list of visits matching the search term and search text
-# TODO: Implement, add auth, run tests
-def search(request):
-	return JsonResponse({'error': 'This endpoint is not implemented yet.'})
-	if request.method == 'POST':
-		data = loads(request.body)
-		visits = Visit.objects.filter(name__icontains=data['name'])
-		serializer = VisitSerializer(visits, many=True)
-		return JsonResponse(serializer.data, safe=False)
-	else:
-		return JsonResponse({'error': 'This endpoint only accepts POST requests.'})
 # Add
 # Create functionality for visits
 # Takes all visit fields as part of the request body

@@ -34,19 +34,6 @@ def details(request, id):
 			return JsonResponse({'error': 'No owner found with that id.'})
 	else:
 		return JsonResponse({'error': 'This endpoint only accepts GET requests.'})
-# Search
-# Takes a search term and search text as part of the request body
-# Returns a list of owners matching the search term and search text
-# TODO: Implement
-def search(request):
-	return JsonResponse({'error': 'This endpoint is not implemented yet.'})
-	if request.method == 'POST':
-		data = loads(request.body)
-		owners = Owner.objects.filter(name__icontains=data['name'])
-		serializer = OwnerSerializer(owners, many=True)
-		return JsonResponse(serializer.data, safe=False)
-	else:
-		return JsonResponse({'error': 'This endpoint only accepts POST requests.'})
 # Add
 # Create functionality for owners
 # Takes all owner fields as part of the request body
@@ -69,7 +56,6 @@ def add(request):
 # Update functionality for owners
 # Takes an id as part of the endpoint and all owner fields as part of the request body
 # Returns the id of the updated owner
-# TODO: fix the fields on the update line
 @csrf_exempt
 def edit(request, id):
 	if request.method == 'POST':

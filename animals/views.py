@@ -36,19 +36,6 @@ def details(request, id):
 			return JsonResponse({'error': 'No animal found with that id.'})
 	else:
 		return JsonResponse({'error': 'This endpoint only accepts GET requests.'})
-# Search
-# Takes a search term and search text as part of the request body
-# Returns a list of animals matching the search term and search text
-# TODO: Implement this, add auth, run tests
-def search(request):
-	return JsonResponse({'error': 'This endpoint is not implemented yet.'})
-	if request.method == 'POST':
-		data = loads(request.body)
-		animals = Animal.objects.filter(name__icontains=data['name'])
-		serializer = AnimalSerializer(animals, many=True)
-		return JsonResponse(serializer.data, safe=False)
-	else:
-		return JsonResponse({'error': 'This endpoint only accepts POST requests.'})
 # Add
 # Create functionality for animals
 # Takes all animal fields as part of the request body
