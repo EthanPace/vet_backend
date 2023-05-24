@@ -29,7 +29,7 @@ def details(request, id):
 		owner = Owner.objects.filter(id=id)
 		if owner:
 			serializer = OwnerSerializer(owner[0])
-			return JsonResponse(find_pets(serializer.data), safe=False)
+			return JsonResponse(find_pets(loads(serializer.data)), safe=False)
 		else:
 			return JsonResponse({'error': 'No owner found with that id.'})
 	else:
@@ -47,11 +47,11 @@ def add(request):
 		serial = OwnerSerializer(data=data)
 		if serial.is_valid():
 			serial.save()
-			return JsonResponse(serial.data, safe=False)
+			return JsonResponse({"result":"success", "data":serial.data}, safe=False, status=201)
 		else:
-			return JsonResponse({'error': 'Invalid data.'})
+			return JsonResponse({'error': 'Invalid data.'}, status=400)
 	else:
-		return JsonResponse({'error': 'This endpoint only accepts POST requests.'})
+		return JsonResponse({'error': 'This endpoint only accepts POST requests.'}, status=405)
 # Edit
 # Update functionality for owners
 # Takes an id as part of the endpoint and all owner fields as part of the request body

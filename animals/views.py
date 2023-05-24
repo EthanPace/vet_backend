@@ -4,6 +4,7 @@ from .models import Animal
 from .serializers import AnimalSerializer
 from json import loads
 from visits.models import Visit
+from owners.models import Owner
 # Index
 # Takes no arguments
 # Returns an overview of all animals
@@ -18,9 +19,9 @@ def index(request):
 		else:
 			animals = Animal.objects.all()
 		serializer = AnimalSerializer(animals, many=True)
-		return overview(serializer.data)
+		return JsonResponse(overview(serializer.data), safe=False, status=200)
 	else:
-		return JsonResponse({'error': 'This endpoint only accepts GET requests.'})
+		return JsonResponse({'error': 'This endpoint only accepts GET requests.'}, status=405)
 # Details
 # Takes an id as part of the endpoint
 # Returns the full details of the animal with the given id
@@ -47,14 +48,15 @@ def add(request):
 	if request.method == 'POST':
 		body = request.body.decode('utf-8')
 		data = loads(body)
+		#data['owner'] = find_owner(data['owner'])
 		serial = AnimalSerializer(data=data)
 		if serial.is_valid():
 			serial.save()
-			return JsonResponse(serial.data, safe=False)
+			return JsonResponse({"result":"success", "data":serial.data}, safe=False, status=201)
 		else:
-			return JsonResponse({'error': 'Invalid data.'})
+			return JsonResponse({'error': 'Invalid data.'}, status=400)
 	else:
-		return JsonResponse({'error': 'This endpoint only accepts POST requests.'})
+		return JsonResponse({'error': 'This endpoint only accepts POST requests.'}, status=405)
 # Edit
 # Update functionality for animals
 # Takes an id as part of the endpoint and all animal fields as part of the request body
@@ -68,7 +70,20 @@ def edit(request, id):
 		data = loads(request.body)
 		animal = Animal.objects.filter(id=id)
 		if animal:
-			animal.update(name=data['name'], species=data['species'], breed=data['breed'], color=data['color'], sex=data['sex'], DOB=data['DOB'], weight=data['weight'], vaccination_status=data['vaccination_status'], last_vaccination_date=data['last_vaccination_date'], next_vaccination_date=data['next_vaccination_date'], desexed=data['desexed'], microchip_number=data['microchip_number'])
+			animal.update(
+				name=data['name'],
+				owner=find_owner(data['owner']),
+				species=data['species'],
+				breed=data['breed'],
+				color=data['color'],
+				sex=data['sex'],
+				DOB=data['DOB'],
+				weight=data['weight'],
+				vaccination_status=data['vaccination_status'],
+				last_vaccination_date=data['last_vaccination_date'],
+				next_vaccination_date=data['next_vaccination_date'],
+				desexed=data['desexed'],
+				microchip_number=data['microchip_number'])
 			return JsonResponse({'id': animal[0].id})
 		else:
 			return JsonResponse({'error': 'No animal found with that id.'})
@@ -99,15 +114,26 @@ def overview(animals):
 	overview = []
 	for animal in animals:
 		overview.append({
+			"id":animal['id'],
 			"name":animal['name'], 
 			"species":animal['species']
 		})
-	return JsonResponse(overview, safe=False)
+	return overview
 # Find Visits
 # Takes an animal
 # Returns a list of visits for that animal
 # TODO: Test this
 def find_visits(animal):
 	visits = Visit.objects.filter(animal=animal['id'])
-	animal['visits'] = visits
+	animal['visits'] = []
+	for visit in visits:
+		animal['visits'].append({
+			"id":visit.id,
+			"date":visit.date,
+		})
 	return animal
+# Find Owner
+# Takes an owner id
+# Returns the owner with that id
+def find_owner(id):
+	return Owner.objects.filter(id=id)[0]
