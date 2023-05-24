@@ -38,13 +38,13 @@ GET		details/<int:id>
 
 POST	add/
 
-			body: {'owner'(id), 'name', 'species', 'breed', 'colour', 'sex', 'DOB', 'weight', 'vaccination_status', 'last_vaccination_date', 'next_vaccination_date', 'desexed', 'microchip_number'}
+			body: {"owner"(id), "name", "species", "breed", "colour", "sex", "DOB", "weight", "vaccination_status", "last_vaccination_date", "next_vaccination_date", "desexed", "microchip_number"}
 
 			creates a new animal entry
 
 PUT		edit/<int:id>
 
-			body: {'owner'(id), 'name', 'species', 'breed', 'colour', 'sex', 'DOB', 'weight', 'vaccination_status', 'last_vaccination_date', 'next_vaccination_date', 'desexed', 'microchip_number'}
+			body: {"owner"(id), "name", "species", "breed", "colour", "sex", "DOB", "weight", "vaccination_status", "last_vaccination_date", "next_vaccination_date", "desexed", "microchip_number"}
 
 			updates an existing animal
 
@@ -64,13 +64,13 @@ GET		details/<int:id>
 
 POST	add/
 
-			body: {'first_name', 'last_name', 'phone_number', 'email', 'availability', 'staff'}
+			body: {"first_name", "last_name", "phone_number", "email", "availability", "staff"}
 
 			creates a new owner
 
 PUT		edit/<int:id>
 
-			body: {'first_name', 'last_name', 'phone_number', 'email', 'availability', 'staff'}
+			body: {"first_name", "last_name", "phone_number", "email", "availability", "staff"}
 
 			updates an existing owner
 
@@ -91,13 +91,13 @@ GET		details/<int:id>
 
 POST	add/
 
-			body: {'date_time', 'reason', 'notes', 'animal'}
+			body: {"date_time", "reason", "notes", "animal"}
 
 			creates a new visit
 
 PUT		edit/<int:id>
 
-			body: {'date_time', 'reason', 'notes', 'animal'}
+			body: {"date_time", "reason", "notes", "animal"}
 
 			updates an existing owner
 
