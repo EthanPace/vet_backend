@@ -32,11 +32,11 @@ def details(request, id):
 		animal = Animal.objects.filter(id=id)
 		if animal:
 			serializer = AnimalSerializer(animal[0])
-			return JsonResponse(find_visits(serializer.data), safe=False)
+			return JsonResponse(find_visits(serializer.data), safe=False, status=200)
 		else:
-			return JsonResponse({'error': 'No animal found with that id.'})
+			return JsonResponse({'error': 'No animal found with that id.'}, status=400)
 	else:
-		return JsonResponse({'error': 'This endpoint only accepts GET requests.'})
+		return JsonResponse({'error': 'This endpoint only accepts GET requests.'}, status=405)
 # Add
 # Create functionality for animals
 # Takes all animal fields as part of the request body
@@ -62,35 +62,37 @@ def add(request):
 # Edit
 # Update functionality for animals
 # Takes an id as part of the endpoint and all animal fields as part of the request body
-# Returns the id of the updated animal
-# TODO: Fix the fields on the update line
+# Returns the id of the updated animal\
 # TODO: Add Authorization
 # TODO: Test this
 @csrf_exempt
 def edit(request, id):
-	if request.method == 'POST':
+	if request.method == 'PUT':
 		data = loads(request.body)
-		animal = Animal.objects.filter(id=id)
-		if animal:
-			animal.update(
-				name=data['name'],
-				owner=find_owner(data['owner']),
-				species=data['species'],
-				breed=data['breed'],
-				color=data['color'],
-				sex=data['sex'],
-				DOB=data['DOB'],
-				weight=data['weight'],
-				vaccination_status=data['vaccination_status'],
-				last_vaccination_date=data['last_vaccination_date'],
-				next_vaccination_date=data['next_vaccination_date'],
-				desexed=data['desexed'],
-				microchip_number=data['microchip_number'])
-			return JsonResponse({'id': animal[0].id})
+		if find_owner(data['owner']):
+			animal = Animal.objects.filter(id=id)
+			if animal:
+				animal.update(
+					name=data['name'],
+					owner=data['owner'],
+					species=data['species'],
+					breed=data['breed'],
+					color=data['color'],
+					sex=data['sex'],
+					DOB=data['DOB'],
+					weight=data['weight'],
+					vaccination_status=data['vaccination_status'],
+					last_vaccination_date=data['last_vaccination_date'],
+					next_vaccination_date=data['next_vaccination_date'],
+					desexed=data['desexed'],
+					microchip_number=data['microchip_number'])
+				return JsonResponse({"result":"success", 'id': animal[0].id}, safe=False, status=200)
+			else:
+				return JsonResponse({'error': 'No animal found with that id.'}, status=400)
 		else:
-			return JsonResponse({'error': 'No animal found with that id.'})
+			return JsonResponse({'error': 'No owner found with that id.'}, status=400)
 	else:
-		return JsonResponse({'error': 'This endpoint only accepts POST requests.'})
+		return JsonResponse({'error': 'This endpoint only accepts PUT requests.'}, status=405)
 # Delete
 # Delete functionality for animals
 # Takes an id as part of the endpoint
@@ -99,15 +101,15 @@ def edit(request, id):
 # TODO: Test this
 @csrf_exempt
 def delete(request, id):
-	if request.method == 'POST':
+	if request.method == 'DELETE':
 		animal = Animal.objects.filter(id=id)
 		if animal:
 			animal.delete()
-			return JsonResponse({'success': 'Animal deleted successfully.'})
+			return JsonResponse({'success': 'Animal deleted successfully.'}, status=200)
 		else:
-			return JsonResponse({'error': 'No animal found with that id.'})
+			return JsonResponse({'error': 'No animal found with that id.'}, status=400)
 	else:
-		return JsonResponse({'error': 'This endpoint only accepts POST requests.'})
+		return JsonResponse({'error': 'This endpoint only accepts DELETE requests.'}, status=405)
 # Overview
 # Takes a list of animals
 # Returns an overview of all animals
