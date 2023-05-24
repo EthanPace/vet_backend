@@ -48,13 +48,15 @@ def add(request):
 	if request.method == 'POST':
 		body = request.body.decode('utf-8')
 		data = loads(body)
-		#data['owner'] = find_owner(data['owner'])
-		serial = AnimalSerializer(data=data)
-		if serial.is_valid():
-			serial.save()
-			return JsonResponse({"result":"success", "data":serial.data}, safe=False, status=201)
+		if find_owner(data['owner']):
+			serial = AnimalSerializer(data=data)
+			if serial.is_valid():
+				serial.save()
+				return JsonResponse({"result":"success", "data":serial.data}, safe=False, status=201)
+			else:
+				return JsonResponse({'error': 'Invalid data.'}, status=400)
 		else:
-			return JsonResponse({'error': 'Invalid data.'}, status=400)
+			return JsonResponse({'error': 'No owner found with that id.'}, status=400)
 	else:
 		return JsonResponse({'error': 'This endpoint only accepts POST requests.'}, status=405)
 # Edit
