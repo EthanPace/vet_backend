@@ -13,18 +13,15 @@ from hashlib import sha256
 @csrf_exempt
 def login(request):
 	if request.method == 'POST':
-		if request.session['logged_in'] != True:
-			data = loads(request.body)
-			user = User.objects.filter(username=data['username'], password=hash(data['password']))
-			if user:
-				request.session['logged_in'] = True
-				request.session['user_id'] = user[0].id
-				request.session['user_role'] = user[0].role
-				return JsonResponse({'id': user[0].id, 'role': user[0].role})
-			else:
-				return JsonResponse({'error': 'No user found with that username and password.'})
+		data = loads(request.body)
+		user = User.objects.filter(username=data['username'], password=hash(data['password']))
+		if user:
+			request.session['logged_in'] = True
+			request.session['user_id'] = user[0].id
+			request.session['user_role'] = user[0].role
+			return JsonResponse({'result':'true'})
 		else:
-			return JsonResponse({'error': 'A user is already logged in.'})
+			return JsonResponse({'error': 'No user found with that username and password.'})
 	else:
 		return JsonResponse({'error': 'This endpoint only accepts POST requests.'})
 # Logout
@@ -65,7 +62,7 @@ def edit(request, id):
 		data = loads(request.body)
 		user = User.objects.filter(id=id)
 		if user:
-			user.update(username=data['username'], password=data['password'])
+			user.update(username=data['username'], password=hash(data['password']))
 			return JsonResponse({'id': user[0].id, 'role': user[0].role})
 		else:
 			return JsonResponse({'error': 'No user found with that id.'})
