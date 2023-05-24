@@ -42,6 +42,8 @@ POST	add/
 
 			creates a new animal entry
 
+			OWNER MUST EXIST BEFORE ANIMAL
+
 PUT		edit/<int:id>
 
 			body: {"owner"(id), "name", "species", "breed", "colour", "sex", "DOB", "weight", "vaccination_status", "last_vaccination_date", "next_vaccination_date", "desexed", "microchip_number"}
@@ -94,6 +96,8 @@ POST	add/
 			body: {"date_time", "reason", "notes", "animal"}
 
 			creates a new visit
+
+			ANIMAL MUST EXIST BEFORE VISIT
 
 PUT		edit/<int:id>
 
