@@ -85,7 +85,8 @@ def edit(request, id):
 					last_vaccination_date=data['last_vaccination_date'],
 					next_vaccination_date=data['next_vaccination_date'],
 					desexed=data['desexed'],
-					microchip_number=data['microchip_number'])
+					microchip_number=data['microchip_number']
+				)
 				return JsonResponse({"result":"success", 'id': animal[0].id}, safe=False, status=200)
 			else:
 				return JsonResponse({'error': 'No animal found with that id.'}, status=400)
