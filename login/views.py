@@ -56,16 +56,13 @@ def register(request):
 @csrf_exempt
 def edit(request, id):
 	if request.method == 'POST':
-		if request.session['user_role'] == 'admin' or request.session['user_id'] == id:
-			data = loads(request.body)
-			user = User.objects.filter(id=id)
-			if user:
-				user.update(username=data['username'], password=hash(data['password']), role=data['role'])
-				return JsonResponse({"result":"success","data":{'id': user[0].id, 'role': user[0].role, "hashcheckREMOVE":user[0].password}}, safe=False, status=200)
-			else:
-				return JsonResponse({'error': 'No user found with that id.'}, status=400)
+		data = loads(request.body)
+		user = User.objects.filter(id=id)
+		if user:
+			user.update(username=data['username'], password=hash(data['password']), role=data['role'])
+			return JsonResponse({"result":"success","data":{'id': user[0].id, 'role': user[0].role}}, safe=False, status=200)
 		else:
-			return JsonResponse({'error': 'You do not have permission to edit this user.'}, status=401)
+			return JsonResponse({'error': 'No user found with that id.'}, status=400)
 	else:
 		return JsonResponse({'error': 'This endpoint only accepts POST requests.'}, status=405)
 # Delete
@@ -75,15 +72,12 @@ def edit(request, id):
 @csrf_exempt
 def delete(request, id):
 	if request.method == 'POST':
-		if request.session['user_role'] == 'admin' or request.session['user_id'] == id:
-			user = User.objects.filter(id=id)
-			if user:
-				user.delete()
-				return JsonResponse({'result': 'success'}, status=200)
-			else:
-				return JsonResponse({'error': 'No user found with that id.'}, status=400)
+		user = User.objects.filter(id=id)
+		if user:
+			user.delete()
+			return JsonResponse({'result': 'success'}, status=200)
 		else:
-			return JsonResponse({'error': 'You do not have permission to delete this user.'}, status=401)
+			return JsonResponse({'error': 'No user found with that id.'}, status=400)
 	else:
 		return JsonResponse({'error': 'This endpoint only accepts POST requests.'}, status=405)
 # Hash
