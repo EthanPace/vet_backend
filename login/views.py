@@ -11,7 +11,7 @@ from hashlib import sha256
 @csrf_exempt
 def login(request):
 	if request.method == 'POST':
-		if request.session['logged_in']:
+		if request.session.get('logged_in', False) == False:
 			data = loads(request.body)
 			user = User.objects.filter(username=data['username'], password=hash(data['password']))
 			if user:
@@ -28,6 +28,7 @@ def login(request):
 # Logout
 # Takes no arguments
 # Returns a success message if the user was logged out successfully
+@csrf_exempt
 def logout(request):
 	if request.session['logged_in']:
 		request.session.flush()
