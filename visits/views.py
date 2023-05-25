@@ -18,9 +18,9 @@ def index(request):
 		else:
 			visits = Visit.objects.all()
 		serializer = VisitSerializer(visits, many=True)
-		return overview(serializer.data)
+		return JsonResponse(overview(serializer.data), safe=False, status=200)
 	else:
-		return JsonResponse({'error': 'This endpoint only accepts GET requests.'})
+		return JsonResponse({'error': 'This endpoint only accepts GET requests.'}, status=405)
 # Details
 # Takes an id as part of the endpoint
 # Returns the full details of the visit with the given id
@@ -31,11 +31,11 @@ def details(request, id):
 		visit = Visit.objects.filter(id=id)
 		if visit:
 			serializer = VisitSerializer(visit[0])
-			return JsonResponse(find_animal(serializer.data), safe=False)
+			return JsonResponse(find_animal(serializer.data), safe=False, status=200)
 		else:
-			return JsonResponse({'error': 'No visit found with that id.'})
+			return JsonResponse({'error': 'No visit found with that id.'}, status=400)
 	else:
-		return JsonResponse({'error': 'This endpoint only accepts GET requests.'})
+		return JsonResponse({'error': 'This endpoint only accepts GET requests.'}, status=405)
 # Add
 # Create functionality for visits
 # Takes all visit fields as part of the request body
@@ -47,14 +47,17 @@ def add(request):
 	if request.method == 'POST':
 		body = request.body.decode('utf-8')
 		data = loads(body)
-		serial = VisitSerializer(data=data)
-		if serial.is_valid():
-			serial.save()
-			return JsonResponse(serial.data, safe=False)
+		if find_animal(data['animal']):
+			serial = VisitSerializer(data=data)
+			if serial.is_valid():
+				serial.save()
+				return JsonResponse({"result":"success", "data":serial.data}, safe=False, status=201)
+			else:
+				return JsonResponse({'error': 'Invalid data.'}, status=400)
 		else:
-			return JsonResponse({'error': 'Invalid data.'})
+			return JsonResponse({'error': 'No animal found with that id.'}, status=400)
 	else:
-		return JsonResponse({'error': 'This endpoint only accepts POST requests.'})
+		return JsonResponse({'error': 'This endpoint only accepts POST requests.'}, status=405)
 # Edit
 # Update functionality for visits
 # Takes an id as part of the endpoint and all visit fields as part of the request body
@@ -64,16 +67,16 @@ def add(request):
 # TODO: Test this
 @csrf_exempt
 def edit(request, id):
-	if request.method == 'POST':
+	if request.method == 'PUT':
 		data = loads(request.body)
 		visit = Visit.objects.filter(id=id)
 		if visit:
 			visit.update()
-			return JsonResponse({'id': visit[0].id})
+			return JsonResponse({"result":"success", 'id': visit[0].id}, safe=False, status=200)
 		else:
-			return JsonResponse({'error': 'No visit found with that id.'})
+			return JsonResponse({'error': 'No visit found with that id.'}, status=400)
 	else:
-		return JsonResponse({'error': 'This endpoint only accepts POST requests.'})
+		return JsonResponse({'error': 'This endpoint only accepts PUT requests.'}, status=405)
 # Delete
 # Delete functionality for visits
 # Takes an id as part of the endpoint
@@ -82,15 +85,15 @@ def edit(request, id):
 # TODO: Test this
 @csrf_exempt
 def delete(request, id):
-	if request.method == 'POST':
+	if request.method == 'DELETE':
 		visit = Visit.objects.filter(id=id)
 		if visit:
 			visit.delete()
-			return JsonResponse({'success': 'Visit deleted successfully.'})
+			return JsonResponse({'success': 'Visit deleted successfully.'}, status=200)
 		else:
-			return JsonResponse({'error': 'No visit found with that id.'})
+			return JsonResponse({'error': 'No visit found with that id.'}, status=400)
 	else:
-		return JsonResponse({'error': 'This endpoint only accepts POST requests.'})
+		return JsonResponse({'error': 'This endpoint only accepts DELETE requests.'}, status=405)
 # Overview
 # Takes a list of owners
 # Returns an summarised view of the owners
@@ -102,7 +105,7 @@ def overview(data):
 			'id': datum['id'],
 			'date_time': datum['date_time'],
 		})
-	return JsonResponse(overview, safe=False)
+	return overview
 # Find Animal
 # Takes a visit
 # Returns the animal associated with the visit

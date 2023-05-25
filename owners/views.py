@@ -63,7 +63,7 @@ def add(request):
 # TODO: Test this
 @csrf_exempt
 def edit(request, id):
-	if request.method == 'POST':
+	if request.method == 'PUT':
 		data = loads(request.body)
 		owner = Owner.objects.filter(id=id)
 		if owner:
@@ -79,7 +79,7 @@ def edit(request, id):
 		else:
 			return JsonResponse({'error': 'No owner found with that id.'}, status=400)
 	else:
-		return JsonResponse({'error': 'This endpoint only accepts POST requests.'}, status=405)
+		return JsonResponse({'error': 'This endpoint only accepts PUT requests.'}, status=405)
 # Delete
 # Delete functionality for owners
 # Takes an id as part of the endpoint
@@ -88,7 +88,7 @@ def edit(request, id):
 # TODO: Test this
 @csrf_exempt
 def delete(request, id):
-	if request.method == 'POST':
+	if request.method == 'DELETE':
 		owner = Owner.objects.filter(id=id)
 		if owner:
 			owner.delete()
@@ -96,7 +96,7 @@ def delete(request, id):
 		else:
 			return JsonResponse({'error': 'No owner found with that id.'}, status=400)
 	else:
-		return JsonResponse({'error': 'This endpoint only accepts POST requests.'}, status=405)
+		return JsonResponse({'error': 'This endpoint only accepts DELETE requests.'}, status=405)
 # Overview
 # Takes a list of owners
 # Returns an summarised view of the owners
