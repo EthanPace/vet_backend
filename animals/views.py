@@ -134,7 +134,7 @@ def find_visits(animal):
 	for visit in visits:
 		animal['visits'].append({
 			"id":visit.id,
-			"date":visit.date,
+			"date_time":visit.date_time,
 		})
 	return animal
 # Find Owner

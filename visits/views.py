@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from datetime import datetime
 from .models import Visit
 from .serializers import VisitSerializer
 from json import loads
@@ -48,6 +49,7 @@ def add(request):
 		body = request.body.decode('utf-8')
 		data = loads(body)
 		if find_animal(data['animal']):
+			datetime.strptime(data['date_time'], '%d-%m-%Y %H:%M')
 			serial = VisitSerializer(data=data)
 			if serial.is_valid():
 				serial.save()
@@ -110,7 +112,7 @@ def overview(data):
 # Takes a visit
 # Returns the animal associated with the visit
 def find_animal(data):
-	animal = Animal.objects.filter(id=data['animal'])
+	animal = Animal.objects.filter(id=data)
 	if animal:
-		data['animal'] = animal[0]
+		data = animal[0]
 	return data
