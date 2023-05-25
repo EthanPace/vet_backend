@@ -11,26 +11,29 @@ from hashlib import sha256
 @csrf_exempt
 def login(request):
 	if request.method == 'POST':
-		data = loads(request.body)
-		user = User.objects.filter(username=data['username'], password=hash(data['password']))
-		if user:
-			request.session['logged_in'] = True
-			request.session['user_id'] = user[0].id
-			request.session['user_role'] = user[0].role
-			return JsonResponse({'result':'true'})
+		if request.session['logged_in']:
+			data = loads(request.body)
+			user = User.objects.filter(username=data['username'], password=hash(data['password']))
+			if user:
+				request.session['logged_in'] = True
+				request.session['user_id'] = user[0].id
+				request.session['user_role'] = user[0].role
+				return JsonResponse({'result':'success'}, status=200)
+			else:
+				return JsonResponse({'error': 'No user found with that username and password.'}, status=400)
 		else:
-			return JsonResponse({'error': 'No user found with that username and password.'})
+			return JsonResponse({'error': 'A user is already logged in.'}, status=409)
 	else:
-		return JsonResponse({'error': 'This endpoint only accepts POST requests.'})
+		return JsonResponse({'error': 'This endpoint only accepts POST requests.'}, status=405)
 # Logout
 # Takes no arguments
 # Returns a success message if the user was logged out successfully
 def logout(request):
 	if request.session['logged_in']:
 		request.session.flush()
-		return JsonResponse({'success': 'User logged out successfully.'})
+		return JsonResponse({'result': 'success'}, status=200)
 	else:
-		return JsonResponse({'error': 'No user logged in.'})
+		return JsonResponse({'error': 'No user logged in.'}, status=409)
 # Register
 # Add functionality for users
 # Takes a username and password as part of the request body
@@ -42,12 +45,12 @@ def register(request):
 		data = loads(request.body)
 		user = User.objects.filter(username=data['username'])
 		if user:
-			return JsonResponse({'error': 'A user with that username already exists.'})
+			return JsonResponse({'error': 'A user with that username already exists.'}, status=409)
 		else:
 			user = User.objects.create(username=data['username'], password=hash(data['password']))
-			return JsonResponse({'id': user.id, 'role': user.role})
+			return JsonResponse({"result":"success", "data":{'id': user.id,'name':user.username, 'role': user.role}}, status=201)
 	else:
-		return JsonResponse({'error': 'This endpoint only accepts POST requests.'})
+		return JsonResponse({'error': 'This endpoint only accepts POST requests.'}, status=405)
 # Edit
 # Update functionality for users
 # Takes an id as part of the endpoint and all user fields as part of the request body
@@ -60,11 +63,11 @@ def edit(request, id):
 		user = User.objects.filter(id=id)
 		if user:
 			user.update(username=data['username'], password=hash(data['password']))
-			return JsonResponse({'id': user[0].id, 'role': user[0].role})
+			return JsonResponse({"result":"success","data":{'id': user[0].id, 'role': user[0].role}}, safe=False, status=200)
 		else:
-			return JsonResponse({'error': 'No user found with that id.'})
+			return JsonResponse({'error': 'No user found with that id.'}, status=400)
 	else:
-		return JsonResponse({'error': 'This endpoint only accepts POST requests.'})
+		return JsonResponse({'error': 'This endpoint only accepts POST requests.'}, status=405)
 # Delete
 # Delete functionality for users
 # Takes an id as part of the endpoint
@@ -76,11 +79,11 @@ def delete(request, id):
 		user = User.objects.filter(id=id)
 		if user:
 			user.delete()
-			return JsonResponse({'success': 'User deleted successfully.'})
+			return JsonResponse({'result': 'success'}, status=200)
 		else:
-			return JsonResponse({'error': 'No user found with that id.'})
+			return JsonResponse({'error': 'No user found with that id.'}, status=400)
 	else:
-		return JsonResponse({'error': 'This endpoint only accepts POST requests.'})
+		return JsonResponse({'error': 'This endpoint only accepts POST requests.'}, status=405)
 # Hash
 # Hash functionality for passwords
 # Takes a password as part of the request body
