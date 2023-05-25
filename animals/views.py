@@ -9,6 +9,7 @@ from owners.models import Owner
 # Index
 # Takes no arguments
 # Returns an overview of all animals
+# TODO: Fix Pagination
 def index(request):
 	# check if the request method is GET
 	if request.method == 'GET':
@@ -116,14 +117,13 @@ def edit(request, id):
 					owner=data['owner'],
 					species=data['species'],
 					breed=data['breed'],
-					color=data['color'],
+					colour=data['colour'],
 					sex=data['sex'],
 					DOB=data['DOB'],
 					weight=data['weight'],
 					vaccination_status=data['vaccination_status'],
 					last_vaccination_date=data['last_vaccination_date'],
 					next_vaccination_date=data['next_vaccination_date'],
-					desexed=data['desexed'],
 					microchip_number=data['microchip_number']
 				)
 				# return the id of the updated animal with a success message
