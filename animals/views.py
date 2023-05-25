@@ -63,13 +63,13 @@ def add(request):
 		# check if the owner exists
 		if find_owner(data['owner']):
 			# convert dates to datetime objects
-			data['DOB'] = datetime.strptime(data['DOB'], '%d-%m-%Y').date()
+			data['DOB'] = date(data['DOB'])
 			# check if the last vaccination date exists, and convert to datetime object if it does
 			if data['last_vaccination_date']:
-				data['last_vaccination_date'] = datetime.strptime(data['last_vaccination_date'], '%d-%m-%Y').date()
+				data['last_vaccination_date'] = date(data['last_vaccination_date'])
 			# check if the next vaccination date exists, and convert to datetime object if it does
 			if data['next_vaccination_date']:
-				data['next_vaccination_date'] = datetime.strptime(data['next_vaccination_date'], '%d-%m-%Y').date()
+				data['next_vaccination_date'] = date(data['next_vaccination_date'])
 			# serialize the data
 			serial = AnimalSerializer(data=data)
 			# check if the data is valid
@@ -100,13 +100,13 @@ def edit(request, id):
 		# check if the owner exists
 		if find_owner(data['owner']):
 			# convert dates to datetime objects
-			data['DOB'] = datetime.strptime(data['DOB'], '%d-%m-%Y').date()
+			data['DOB'] = date(data['DOB'])
 			# check if the last vaccination date exists, and convert to datetime object if it does
 			if data['last_vaccination_date']:
-				data['last_vaccination_date'] = datetime.strptime(data['last_vaccination_date'], '%d-%m-%Y').date()
+				data['last_vaccination_date'] = date(data['last_vaccination_date'])
 			# check if the next vaccination date exists, and convert to datetime object if it does
 			if data['next_vaccination_date']:
-				data['next_vaccination_date'] = datetime.strptime(data['next_vaccination_date'], '%d-%m-%Y').date()
+				data['next_vaccination_date'] = date(data['next_vaccination_date'])
 			# find the animal with the given id
 			animal = Animal.objects.filter(id=id)
 			# check if the animal exists
@@ -198,3 +198,8 @@ def find_visits(animal):
 # Returns the owner with that id
 def find_owner(id):
 	return Owner.objects.filter(id=id)
+# Date
+# Takes a date string
+# Returns a date object
+def date(date):
+	return datetime.strptime(date, '%d-%m-%Y').date()
