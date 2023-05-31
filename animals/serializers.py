@@ -8,7 +8,7 @@ class AnimalSerializer(serializers.ModelSerializer):
 			'id', 
 			'owner', 
 			'name', 
-			'species', 
+			'species',
 			'breed', 
 			'colour', 
 			'sex', 
@@ -17,5 +17,7 @@ class AnimalSerializer(serializers.ModelSerializer):
 			'vaccination_status', 
 			'last_vaccination_date',
 			'next_vaccination_date',
+			'desexed',
+			'deceased',
 			'microchip_number'
 		]

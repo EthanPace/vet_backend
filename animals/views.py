@@ -77,7 +77,7 @@ def add(request):
 				# save the data
 				serial.save()
 				# return the result
-				return JsonResponse({"result":"success", "data":serial.data}, safe=False, status=201)
+				return JsonResponse({"result":"success", "id":serial.data["id"]}, safe=False, status=201)
 			else:
 				# return an error if the data is invalid
 				return JsonResponse({'error': 'Invalid data.'}, status=400)
@@ -162,7 +162,6 @@ def delete(request, id):
 # Overview
 # Takes a list of animals
 # Returns an overview of all animals
-# TODO: Check with Maclane to see what he needs here
 def overview(animals):
 	# create an empty list
 	overview = []
@@ -172,7 +171,9 @@ def overview(animals):
 		overview.append({
 			"id":animal['id'],
 			"name":animal['name'], 
-			"species":animal['species']
+			"species":animal['species'],
+			"breed":animal['breed'],
+			"colour":animal['colour'],
 		})
 	# return the list
 	return overview

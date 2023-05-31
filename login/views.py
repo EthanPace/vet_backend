@@ -46,7 +46,7 @@ def register(request):
 			return JsonResponse({'error': 'A user with that username already exists.'}, status=409)
 		else:
 			user = User.objects.create(username=data['username'], password=hash(data['password']), role="none")
-			return JsonResponse({"result":"success", "data":{'id': user.id, 'name':user.username}}, status=201)
+			return JsonResponse({"result":"success", 'id': user.id}, status=201)
 	else:
 		return JsonResponse({'error': 'This endpoint only accepts POST requests.'}, status=405)
 # Edit

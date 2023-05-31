@@ -65,7 +65,7 @@ def add(request):
 			# save the new owner
 			serial.save()
 			# return a success message with the new owner data
-			return JsonResponse({"result":"success", "data":serial.data}, safe=False, status=201)
+			return JsonResponse({"result":"success", "id":serial.data["id"]}, safe=False, status=201)
 		else:
 			# return an error if the data is invalid
 			return JsonResponse({'error': 'Invalid data.'}, status=400)

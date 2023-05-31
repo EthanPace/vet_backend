@@ -17,6 +17,9 @@ class Animal(models.Model):
 	last_vaccination_date = models.DateField()
 	next_vaccination_date = models.DateField()
 
+	desexed = models.BooleanField()
+	deceased = models.BooleanField()
+
 	microchip_number = models.IntegerField()
 
 	def __str__(self):
