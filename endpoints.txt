@@ -1,0 +1,110 @@
+localhost:8000/
+
+POST	login/
+
+			body: {"username":"kevin", "password":"eleven"}
+
+			returns {"result":"true"} if user exists
+
+POST	logout/
+
+			Deletes session variables
+
+POST	register/
+
+			body: {"username":"", "password":"", "role":""}
+
+			Creates a new user account
+
+PUT		edit/<int:id>
+
+			body: {"username", "password", "role"}
+
+			Updates a user account
+
+DELETE	delete/<int:id>
+
+			Deletes a user
+
+
+	animals/
+GET		index/
+
+			returns the full list of animals
+
+GET		details/<int:id>
+
+			returns the full entry for one animal
+
+POST	add/
+
+			body: {"owner"(id), "name", "species", "breed", "colour", "sex", "DOB", "weight", "vaccination_status", "last_vaccination_date", "next_vaccination_date", "desexed", "microchip_number"}
+
+			creates a new animal entry
+
+			OWNER MUST EXIST BEFORE ANIMAL
+
+PUT		edit/<int:id>
+
+			body: {"owner"(id), "name", "species", "breed", "colour", "sex", "DOB", "weight", "vaccination_status", "last_vaccination_date", "next_vaccination_date", "desexed", "microchip_number"}
+
+			updates an existing animal
+
+DELETE	delete/<int:id>
+
+			deletes an animal
+
+
+	owners/
+GET		index/
+
+			returns the full list of owners
+
+GET		details/<int:id>
+
+			returns the full entry for one owner
+
+POST	add/
+
+			body: {"first_name", "last_name", "phone_number", "email", "availability", "staff"}
+
+			creates a new owner
+
+PUT		edit/<int:id>
+
+			body: {"first_name", "last_name", "phone_number", "email", "availability", "staff"}
+
+			updates an existing owner
+
+DELETE	delete/<int:id>
+
+			deletes an existing owner
+
+
+	visits/
+
+GET		index/
+
+			returns a full list of visits
+
+GET		details/<int:id>
+
+			returns the full entry for one visit
+
+POST	add/
+
+			body: {"date_time", "reason", "notes", "animal"}
+
+			creates a new visit
+
+			ANIMAL MUST EXIST BEFORE VISIT
+
+PUT		edit/<int:id>
+
+			body: {"date_time", "reason", "notes", "animal"}
+
+			updates an existing owner
+
+DELETE	delete/<int:id>
+
+			deletes an existing visit
