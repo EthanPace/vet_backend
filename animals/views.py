@@ -162,7 +162,6 @@ def delete(request, id):
 # Overview
 # Takes a list of animals
 # Returns an overview of all animals
-# TODO: Check with Maclane to see what he needs here
 def overview(animals):
 	# create an empty list
 	overview = []
@@ -172,7 +171,9 @@ def overview(animals):
 		overview.append({
 			"id":animal['id'],
 			"name":animal['name'], 
-			"species":animal['species']
+			"species":animal['species'],
+			"breed":animal['breed'],
+			"colour":animal['colour'],
 		})
 	# return the list
 	return overview
