@@ -165,4 +165,4 @@ def find_animal(data):
 # Takes a date_time string
 # Returns a datetime object
 def date(date_time):
-	return datetime.strptime(date_time, '%d-%m-%Y %H:%M')
+	return datetime.strptime(date_time, '%Y-%m-%d %H:%M')

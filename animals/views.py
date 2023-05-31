@@ -203,4 +203,4 @@ def find_owner(id):
 # Takes a date string
 # Returns a date object
 def date(date):
-	return datetime.strptime(date, '%d-%m-%Y').date()
+	return datetime.strptime(date, '%Y-%m-%d').date()
