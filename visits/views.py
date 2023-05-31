@@ -72,7 +72,7 @@ def add(request):
 				# save the visit
 				serial.save()
 				# return the serialized visit data
-				return JsonResponse({"result":"success", "data":serial.data}, safe=False, status=201)
+				return JsonResponse({"result":"success", "id":serial.data["id"]}, safe=False, status=201)
 			else:
 				# return an error if the visit is not valid
 				return JsonResponse({'error': 'Invalid data.'}, status=400)
