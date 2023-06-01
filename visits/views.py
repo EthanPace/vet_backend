@@ -75,7 +75,7 @@ def add(request):
 				return JsonResponse({"result":"success", "id":serial.data["id"]}, safe=False, status=201)
 			else:
 				# return an error if the visit is not valid
-				return JsonResponse({'error': 'Invalid data.'}, status=400)
+				return JsonResponse({'error': 'Invalid data.', 'messages': serial.error_messages}, status=400)
 		else:
 			# return an error if the animal doesn't exist
 			return JsonResponse({'error': 'No animal found with that id.'}, status=400)
@@ -96,13 +96,15 @@ def edit(request, id):
 		visit = Visit.objects.filter(id=id)
 		# check if the visit exists
 		if visit:
-			# update the visit
-			visit.update(
-				date_time = date(data['date_time']),
-				reason = data['reason'],
-				notes = data['notes'],
-				animal = data['animal']
-			)
+			# serialize the visit
+			serial = VisitSerializer(data=data)
+			# check if the visit is valid
+			if serial.is_valid():
+				# save the visit
+				serial.save()
+			else:
+				# return an error if the visit is not valid
+				return JsonResponse({'error': 'Invalid data.', 'messages':serial.error_messages}, status=400)
 			# return the id of the updated visit
 			return JsonResponse({"result":"success", 'id': visit[0].id}, safe=False, status=200)
 		else:

@@ -68,7 +68,7 @@ def add(request):
 			return JsonResponse({"result":"success", "id":serial.data["id"]}, safe=False, status=201)
 		else:
 			# return an error if the data is invalid
-			return JsonResponse({'error': 'Invalid data.'}, status=400)
+			return JsonResponse({'error': 'Invalid data.', 'messages':serial.error_messages}, status=400)
 	else:
 		# return an error if the request method is not POST
 		return JsonResponse({'error': 'This endpoint only accepts POST requests.'}, status=405)
@@ -86,15 +86,15 @@ def edit(request, id):
 		owner = Owner.objects.filter(id=id)
 		# check if the owner exists
 		if owner:
-			# update the owner with the given data
-			owner.update(
-				first_name=data['first_name'],
-				last_name=data['last_name'],
-				phone_number=data['phone_number'],
-				email=data['email'],
-				availability=data['availability'],
-				staff=data['staff']
-			)
+			# serialize the owner
+			serial = OwnerSerializer(data=data)
+			# check if the data is valid
+			if serial.is_valid():
+				# update the owner with the given data
+				owner.update(**serial.validated_data)
+			else:
+				# return an error if the data is invalid
+				return JsonResponse({'error': 'Invalid data.', 'messages':serial.error_messages}, status=400)
 			# return a success message with the updated owner id
 			return JsonResponse({"result":"success",'id': owner[0].id}, safe=False, status=200)
 		else:
