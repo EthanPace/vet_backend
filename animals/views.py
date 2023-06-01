@@ -80,7 +80,7 @@ def add(request):
 				return JsonResponse({"result":"success", "id":serial.data["id"]}, safe=False, status=201)
 			else:
 				# return an error if the data is invalid
-				return JsonResponse({'error': 'Invalid data.'}, status=400)
+				return JsonResponse({'error': 'Invalid data.','messages':serial.error_messages}, status=400)
 		else:
 			# return an error if the owner doesn't exist
 			return JsonResponse({'error': 'No owner found with that id.'}, status=400)
@@ -111,21 +111,12 @@ def edit(request, id):
 			animal = Animal.objects.filter(id=id)
 			# check if the animal exists
 			if animal:
-				# update the animal with the given data
-				animal.update(
-					name=data['name'],
-					owner=data['owner'],
-					species=data['species'],
-					breed=data['breed'],
-					colour=data['colour'],
-					sex=data['sex'],
-					DOB=data['DOB'],
-					weight=data['weight'],
-					vaccination_status=data['vaccination_status'],
-					last_vaccination_date=data['last_vaccination_date'],
-					next_vaccination_date=data['next_vaccination_date'],
-					microchip_number=data['microchip_number']
-				)
+				serial = AnimalSerializer(data=data)
+				if serial.is_valid():
+					animal.update(**serial.validated_data)
+				else:
+					# return an error if the data is invalid
+					return JsonResponse({'error':'Invalid data.','messages':serial.error_messages}, status=400)
 				# return the id of the updated animal with a success message
 				return JsonResponse({"result":"success", 'id': animal[0].id}, safe=False, status=200)
 			else:
