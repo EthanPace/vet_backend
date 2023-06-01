@@ -9,15 +9,14 @@ from owners.models import Owner
 # Index
 # Takes no arguments
 # Returns an overview of all animals
-# TODO: Fix Pagination
 def index(request):
 	# check if the request method is GET
 	if request.method == 'GET':
 		# check if the page and page_size parameters are in the request
 		if 'page' in request.GET:
 			# get the page and page_size parameters from the request
-			page = int(request.GET['page', 1])
-			page_size = int(request.GET['page_size', 10])
+			page = int(request.GET.get('page', 1))
+			page_size = int(request.GET.get('page_size', 10))
 			# get the animals for the given page
 			animals = Animal.objects.all()[(page - 1) * page_size:page * page_size]
 		else:
