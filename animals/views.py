@@ -63,13 +63,7 @@ def add(request):
 		# check if the owner exists
 		if find_owner(data['owner']):
 			# convert dates to datetime objects
-			data['DOB'] = date(data['DOB'])
-			# check if the last vaccination date exists, and convert to datetime object if it does
-			if data['last_vaccination_date']:
-				data['last_vaccination_date'] = date(data['last_vaccination_date'])
-			# check if the next vaccination date exists, and convert to datetime object if it does
-			if data['next_vaccination_date']:
-				data['next_vaccination_date'] = date(data['next_vaccination_date'])
+			data = format(data)
 			# serialize the data
 			serial = AnimalSerializer(data=data)
 			# check if the data is valid
@@ -100,13 +94,7 @@ def edit(request, id):
 		# check if the owner exists
 		if find_owner(data['owner']):
 			# convert dates to datetime objects
-			data['DOB'] = date(data['DOB'])
-			# check if the last vaccination date exists, and convert to datetime object if it does
-			if data['last_vaccination_date']:
-				data['last_vaccination_date'] = date(data['last_vaccination_date'])
-			# check if the next vaccination date exists, and convert to datetime object if it does
-			if data['next_vaccination_date']:
-				data['next_vaccination_date'] = date(data['next_vaccination_date'])
+			data = format(data)
 			# find the animal with the given id
 			animal = Animal.objects.filter(id=id)
 			# check if the animal exists
@@ -190,6 +178,23 @@ def find_visits(animal):
 # Returns the owner with that id
 def find_owner(id):
 	return Owner.objects.filter(id=id)
+# Format
+# Takes an animal
+# Returns the animal with the dates formatted
+def format(animal):
+	# check if the animal contains a date of birth
+	if animal['DOB']:
+		# convert the date of birth to a datetime object
+		animal['DOB'] = date(animal['DOB'])
+	# check if the animal contains a last vaccination date
+	if animal['last_vaccination_date']:
+		# convert the last vaccination date to a datetime object
+		animal['last_vaccination_date'] = date(animal['last_vaccination_date'])
+	# check if the animal contains a next vaccination date
+	if animal['next_vaccination_date']:
+		# convert the next vaccination date to a datetime object
+		animal['next_vaccination_date'] = date(animal['next_vaccination_date'])
+	return animal
 # Date
 # Takes a date string
 # Returns a date object
