@@ -9,15 +9,14 @@ from owners.models import Owner
 # Index
 # Takes no arguments
 # Returns an overview of all animals
-# TODO: Fix Pagination
 def index(request):
 	# check if the request method is GET
 	if request.method == 'GET':
 		# check if the page and page_size parameters are in the request
 		if 'page' in request.GET:
 			# get the page and page_size parameters from the request
-			page = int(request.GET['page', 1])
-			page_size = int(request.GET['page_size', 10])
+			page = int(request.GET.get('page', 1))
+			page_size = int(request.GET.get('page_size', 10))
 			# get the animals for the given page
 			animals = Animal.objects.all()[(page - 1) * page_size:page * page_size]
 		else:
@@ -63,13 +62,7 @@ def add(request):
 		# check if the owner exists
 		if find_owner(data['owner']):
 			# convert dates to datetime objects
-			data['DOB'] = date(data['DOB'])
-			# check if the last vaccination date exists, and convert to datetime object if it does
-			if data['last_vaccination_date']:
-				data['last_vaccination_date'] = date(data['last_vaccination_date'])
-			# check if the next vaccination date exists, and convert to datetime object if it does
-			if data['next_vaccination_date']:
-				data['next_vaccination_date'] = date(data['next_vaccination_date'])
+			data = format(data)
 			# serialize the data
 			serial = AnimalSerializer(data=data)
 			# check if the data is valid
@@ -100,13 +93,7 @@ def edit(request, id):
 		# check if the owner exists
 		if find_owner(data['owner']):
 			# convert dates to datetime objects
-			data['DOB'] = date(data['DOB'])
-			# check if the last vaccination date exists, and convert to datetime object if it does
-			if data['last_vaccination_date']:
-				data['last_vaccination_date'] = date(data['last_vaccination_date'])
-			# check if the next vaccination date exists, and convert to datetime object if it does
-			if data['next_vaccination_date']:
-				data['next_vaccination_date'] = date(data['next_vaccination_date'])
+			data = format(data)
 			# find the animal with the given id
 			animal = Animal.objects.filter(id=id)
 			# check if the animal exists
@@ -190,6 +177,23 @@ def find_visits(animal):
 # Returns the owner with that id
 def find_owner(id):
 	return Owner.objects.filter(id=id)
+# Format
+# Takes an animal
+# Returns the animal with the dates formatted
+def format(animal):
+	# check if the animal contains a date of birth
+	if animal['DOB']:
+		# convert the date of birth to a datetime object
+		animal['DOB'] = date(animal['DOB'])
+	# check if the animal contains a last vaccination date
+	if animal['last_vaccination_date']:
+		# convert the last vaccination date to a datetime object
+		animal['last_vaccination_date'] = date(animal['last_vaccination_date'])
+	# check if the animal contains a next vaccination date
+	if animal['next_vaccination_date']:
+		# convert the next vaccination date to a datetime object
+		animal['next_vaccination_date'] = date(animal['next_vaccination_date'])
+	return animal
 # Date
 # Takes a date string
 # Returns a date object
