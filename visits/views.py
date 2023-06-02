@@ -99,8 +99,7 @@ def edit(request, id):
 			serial = VisitSerializer(data=data)
 			# check if the visit is valid
 			if serial.is_valid():
-				# save the visit
-				serial.save()
+				visit.update(**serial.validated_data)
 			else:
 				# return an error if the visit is not valid
 				return JsonResponse({'error': 'Invalid data.', 'messages':serial.error_messages}, status=400)
