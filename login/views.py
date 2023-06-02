@@ -3,6 +3,18 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import User
 from json import loads
 from hashlib import sha256
+# Details
+# Takes an id as part of the endpoint
+# Returns the full details of the user with the given id (except password)
+def details(request, id):
+	if request.method == 'GET':
+		user = User.objects.filter(id=id)
+		if user:
+			return JsonResponse({'id': user[0].id, 'username': user[0].username, 'role': user[0].role}, status=200)
+		else:
+			return JsonResponse({'error': 'No user found with that id.'}, status=400)
+	else:
+		return JsonResponse({'error': 'This endpoint only accepts GET requests.'}, status=405)
 # Login
 # Takes a username and password as part of the request body
 # Returns the id and role of the user with the given username and password
@@ -16,7 +28,7 @@ def login(request):
 				request.session['logged_in'] = True
 				request.session['user_id'] = user[0].id
 				request.session['user_role'] = user[0].role
-				return JsonResponse({'result':'success'}, status=200)
+				return JsonResponse({'result':'success', "id":user[0].id}, status=200)
 			else:
 				return JsonResponse({'error': 'No user found with that username and password.'}, status=400)
 		else:
@@ -45,7 +57,7 @@ def register(request):
 		if user:
 			return JsonResponse({'error': 'A user with that username already exists.'}, status=409)
 		else:
-			user = User.objects.create(username=data['username'], password=hash(data['password']), role="none")
+			user = User.objects.create(username=data['username'], password=hash(data['password']), role=data['role'])
 			return JsonResponse({"result":"success", 'id': user.id}, status=201)
 	else:
 		return JsonResponse({'error': 'This endpoint only accepts POST requests.'}, status=405)
