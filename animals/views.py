@@ -67,7 +67,7 @@ def details(request, id):
 def add(request):
 	if request.method == 'POST':
 		# check if the user is logged in
-		if request.session.get('user_role', None) == 'admin':
+		if request.session.get('logged_in', False) == True:
 			# get the request body and load as json
 			body = request.body.decode('utf-8')
 			data = loads(body)
@@ -91,7 +91,7 @@ def add(request):
 				return JsonResponse({'error': 'No owner found with that id.'}, status=400)
 		else:
 			# return an error if the user is not an admin
-			return JsonResponse({'error': 'You must be logged in as an admin to view this page.'}, status=401)
+			return JsonResponse({'error': 'You must be logged in to view this page.'}, status=401)
 	else:
 		# return an error if the request method is not POST
 		return JsonResponse({'error': 'This endpoint only accepts POST requests.'}, status=405)
@@ -104,7 +104,7 @@ def edit(request, id):
 	# check if the request method is PUT
 	if request.method == 'PUT':
 		# check if the user is logged in
-		if request.session.get('user_role', None) == 'admin':
+		if request.session.get('logged_in', False) == True:
 			# get the request body and load as json
 			data = loads(request.body)
 			# check if the owner exists
@@ -130,8 +130,8 @@ def edit(request, id):
 				# return an error if the owner doesn't exist
 				return JsonResponse({'error': 'No owner found with that id.'}, status=400)
 		else:
-			# return an error if the user is not an admin
-			return JsonResponse({'error': 'You must be logged in as an admin to view this page.'}, status=401)
+			# return an error if the user is not logged in
+			return JsonResponse({'error': 'You must be logged in to view this page.'}, status=401)
 	else:
 		# return an error if the request method is not PUT
 		return JsonResponse({'error': 'This endpoint only accepts PUT requests.'}, status=405)
@@ -144,7 +144,7 @@ def delete(request, id):
 	# check if the request method is DELETE
 	if request.method == 'DELETE':
 		# check if the user is logged in
-		if request.session.get('user_role', None) == 'admin':
+		if request.session.get('logged_in', False) == True:
 			# find the animal with the given id
 			animal = Animal.objects.filter(id=id)
 			# check if the animal exists
@@ -157,8 +157,8 @@ def delete(request, id):
 				# return an error if the animal doesn't exist
 				return JsonResponse({'error': 'No animal found with that id.'}, status=400)
 		else:
-			# return an error if the user is not an admin
-			return JsonResponse({'error': 'You must be logged in as an admin to view this page.'}, status=401)
+			# return an error if the user is not logged in
+			return JsonResponse({'error': 'You must be logged in to view this page.'}, status=401)
 	else:
 		# return an error if the request method is not DELETE
 		return JsonResponse({'error': 'This endpoint only accepts DELETE requests.'}, status=405)

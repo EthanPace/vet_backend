@@ -65,8 +65,8 @@ def details(request, id):
 def add(request):
 	# check if the request method is POST
 	if request.method == 'POST':
-		# check if the user is logged in as an admin
-		if request.session.get('user_role', None) == "admin":
+		# check if the user is logged in
+		if request.session.get('logged_in', False) == True:
 			# get the request body and load as json
 			body = request.body.decode('utf-8')
 			data = loads(body)
@@ -82,8 +82,8 @@ def add(request):
 				# return an error if the data is invalid
 				return JsonResponse({'error': 'Invalid data.', 'messages':serial.error_messages}, status=400)
 		else:
-			# return an error if the user is not logged in as an admin
-			return JsonResponse({'error': 'You must be logged in as an admin to view this page.'}, status=401)
+			# return an error if the user is not logged in
+			return JsonResponse({'error': 'You must be logged in to view this page.'}, status=401)
 	else:
 		# return an error if the request method is not POST
 		return JsonResponse({'error': 'This endpoint only accepts POST requests.'}, status=405)
@@ -95,8 +95,8 @@ def add(request):
 def edit(request, id):
 	# check if the request method is PUT
 	if request.method == 'PUT':
-		# check if the user is logged in as an admin
-		if request.session.get('user_role', None) == "admin":
+		# check if the user is logged in
+		if request.session.get('logged_in', False) == True:
 			# get the request body and load as json
 			data = loads(request.body)
 			# find the owner with the given id
@@ -118,8 +118,8 @@ def edit(request, id):
 				# return an error if the owner doesn't exist
 				return JsonResponse({'error': 'No owner found with that id.'}, status=400)
 		else:
-			# return an error if the user is not logged in as an admin
-			return JsonResponse({'error': 'You must be logged in as an admin to view this page.'}, status=401)
+			# return an error if the user is not logged in
+			return JsonResponse({'error': 'You must be logged in to view this page.'}, status=401)
 	else:
 		# return an error if the request method is not PUT
 		return JsonResponse({'error': 'This endpoint only accepts PUT requests.'}, status=405)
@@ -131,8 +131,8 @@ def edit(request, id):
 def delete(request, id):
 	# check if the request method is DELETE
 	if request.method == 'DELETE':
-		# check if the user is logged in as an admin
-		if request.session.get('user_role', None) == "admin":
+		# check if the user is logged in
+		if request.session.get('logged_in', False) == True:
 			# find the owner with the given id
 			owner = Owner.objects.filter(id=id)
 			# check if the owner exists
@@ -145,15 +145,14 @@ def delete(request, id):
 				# return an error if the owner doesn't exist
 				return JsonResponse({'error': 'No owner found with that id.'}, status=400)
 		else:
-			# return an error if the user is not logged in as an admin
-			return JsonResponse({'error': 'You must be logged in as an admin to view this page.'}, status=401)
+			# return an error if the user is not logged in
+			return JsonResponse({'error': 'You must be logged in to view this page.'}, status=401)
 	else:
 		# return an error if the request method is not DELETE
 		return JsonResponse({'error': 'This endpoint only accepts DELETE requests.'}, status=405)
 # Overview
 # Takes a list of owners
 # Returns an summarised view of the owners
-# TODO: Check with Maclane to see if this is what he wants
 def overview(data):
 	# create an empty list to store the overview data
 	overview = []

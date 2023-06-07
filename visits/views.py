@@ -67,9 +67,8 @@ def details(request, id):
 def add(request):
 	# check if the request method is POST
 	if request.method == 'POST':
-		# check if the user is logged in as staff or admin
-		role = request.session.get('user_role', None)
-		if role == "staff" or role == "admin":
+		# check that the user is logged in
+		if request.session.get('logged_in', False) == True:
 			# get the request body and load as json
 			body = request.body.decode('utf-8')
 			data = loads(body)
@@ -92,8 +91,8 @@ def add(request):
 				# return an error if the animal doesn't exist
 				return JsonResponse({'error': 'No animal found with that id.'}, status=400)
 		else:
-			# return an error if the user is not logged in as staff
-			return JsonResponse({'error': 'You must be logged in as staff to view this page.'}, status=401)
+			# return an error if the user is not logged in
+			return JsonResponse({'error': 'You must be logged in to view this page.'}, status=401)
 	else:
 		# return an error if the request method is not POST
 		return JsonResponse({'error': 'This endpoint only accepts POST requests.'}, status=405)
@@ -105,9 +104,8 @@ def add(request):
 def edit(request, id):
 	# check if the request method is PUT
 	if request.method == 'PUT':
-		# check if the user is logged in as staff or admin
-		role = request.session.get('user_role', None)
-		if role == "staff" or role == "admin":
+		# check that the user is logged in
+		if request.session.get('logged_in', False) == True:
 			# get the request body and load as json
 			data = loads(request.body)
 			# check if the visit exists
@@ -128,8 +126,8 @@ def edit(request, id):
 				# return an error if the visit doesn't exist
 				return JsonResponse({'error': 'No visit found with that id.'}, status=400)
 		else:
-			# return an error if the user is not logged in as staff
-			return JsonResponse({'error': 'You must be logged in as staff to view this page.'}, status=401)
+			# return an error if the user is not logged in
+			return JsonResponse({'error': 'You must be logged in to view this page.'}, status=401)
 	else:
 		# return an error if the request method is not PUT
 		return JsonResponse({'error': 'This endpoint only accepts PUT requests.'}, status=405)
@@ -156,15 +154,14 @@ def delete(request, id):
 				# return an error if the visit doesn't exist
 				return JsonResponse({'error': 'No visit found with that id.'}, status=400)
 		else:
-			# return an error if the user is not logged in as staff
-			return JsonResponse({'error': 'You must be logged in as staff to view this page.'}, status=401)
+			# return an error if the user is not logged in as staff or admin
+			return JsonResponse({'error': 'You must be logged in to view this page.'}, status=401)
 	else:
 		# return an error if the request method is not DELETE
 		return JsonResponse({'error': 'This endpoint only accepts DELETE requests.'}, status=405)
 # Overview
 # Takes a list of owners
 # Returns an summarised view of the owners
-# TODO: Check with Maclane if this is what he needs here
 def overview(data):
 	# create an empty list to store the overview
 	overview = []
