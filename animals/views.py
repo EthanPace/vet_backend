@@ -6,26 +6,34 @@ from .serializers import AnimalSerializer
 from json import loads
 from visits.models import Visit
 from owners.models import Owner
+from login.models import AuthToken
 # Index
 # Takes no arguments
 # Returns an overview of all animals
 def index(request):
 	# check if the request method is GET
 	if request.method == 'GET':
-		# check if the page and page_size parameters are in the request
-		if 'page' in request.GET:
-			# get the page and page_size parameters from the request
-			page = int(request.GET.get('page', 1))
-			page_size = int(request.GET.get('page_size', 10))
-			# get the animals for the given page
-			animals = Animal.objects.all()[(page - 1) * page_size:page * page_size]
+		# check for an authtoken in the request headers and whether the token exists
+		token = AuthToken.objects.filter(token=request.headers.get('authtoken', ''))
+		# check if the token exists (i.e. the user is logged in)
+		if token:
+			# check if the page and page_size parameters are in the request
+			if 'page' in request.GET:
+				# get the page and page_size parameters from the request
+				page = int(request.GET.get('page', 1))
+				page_size = int(request.GET.get('page_size', 10))
+				# get the animals for the given page
+				animals = Animal.objects.all()[(page - 1) * page_size:page * page_size]
+			else:
+				# get all animals
+				animals = Animal.objects.all()
+			# serialize the animals
+			serializer = AnimalSerializer(animals, many=True)
+			# return the overview of the full list of animals
+			return JsonResponse(overview(serializer.data), safe=False, status=200)
 		else:
-			# get all animals
-			animals = Animal.objects.all()
-		# serialize the animals
-		serializer = AnimalSerializer(animals, many=True)
-		# return the overview of the full list of animals
-		return JsonResponse(overview(serializer.data), safe=False, status=200)
+			# return an error if the user is not logged in
+			return JsonResponse({'error': 'You must be logged in to view this page.'}, status=401)
 	else:
 		# return an error if the request method is not GET
 		return JsonResponse({'error': 'This endpoint only accepts GET requests.'}, status=405)
@@ -35,17 +43,24 @@ def index(request):
 def details(request, id):
 	# check if the request method is GET
 	if request.method == 'GET':
-		# find the animal with the given id
-		animal = Animal.objects.filter(id=id)
-		# check if the animal exists
-		if animal:
-			# serialize the animal (not entirely sure why this is necessary)
-			serializer = AnimalSerializer(animal[0])
-			# return the serialized animal data
-			return JsonResponse(find_visits(serializer.data), safe=False, status=200)
+		# check for an authtoken in the request headers and whether the token exists
+		token = AuthToken.objects.filter(token=request.headers.get('authtoken', ''))
+		# check if the token exists (i.e. the user is logged in)
+		if token:
+			# find the animal with the given id
+			animal = Animal.objects.filter(id=id)
+			# check if the animal exists
+			if animal:
+				# serialize the animal (not entirely sure why this is necessary)
+				serializer = AnimalSerializer(animal[0])
+				# return the serialized animal data
+				return JsonResponse(find_visits(serializer.data), safe=False, status=200)
+			else:
+				# return an error if the animal doesn't exist
+				return JsonResponse({'error': 'No animal found with that id.'}, status=400)
 		else:
-			# return an error if the animal doesn't exist
-			return JsonResponse({'error': 'No animal found with that id.'}, status=400)
+			# return an error if the user is not logged in
+			return JsonResponse({'error': 'You must be logged in to view this page.'}, status=401)
 	else:
 		# return an error if the request method is not GET
 		return JsonResponse({'error': 'This endpoint only accepts GET requests.'}, status=405)
@@ -56,27 +71,34 @@ def details(request, id):
 @csrf_exempt
 def add(request):
 	if request.method == 'POST':
-		# get the request body and load as json
-		body = request.body.decode('utf-8')
-		data = loads(body)
-		# check if the owner exists
-		if find_owner(data['owner']):
-			# convert dates to datetime objects
-			data = format(data)
-			# serialize the data
-			serial = AnimalSerializer(data=data)
-			# check if the data is valid
-			if serial.is_valid():
-				# save the data
-				serial.save()
-				# return the result
-				return JsonResponse({"result":"success", "id":serial.data["id"]}, safe=False, status=201)
+		# check for an authtoken in the request headers and whether the token exists
+		token = AuthToken.objects.filter(token=request.headers.get('authtoken', ''))
+		# check if the token exists (i.e. the user is logged in)
+		if token:
+			# get the request body and load as json
+			body = request.body.decode('utf-8')
+			data = loads(body)
+			# check if the owner exists
+			if find_owner(data['owner']):
+				# convert dates to datetime objects
+				data = format(data)
+				# serialize the data
+				serial = AnimalSerializer(data=data)
+				# check if the data is valid
+				if serial.is_valid():
+					# save the data
+					serial.save()
+					# return the result
+					return JsonResponse({"result":"success", "id":serial.data["id"]}, safe=False, status=201)
+				else:
+					# return an error if the data is invalid
+					return JsonResponse({'error': 'Invalid data.','messages':serial.error_messages}, status=400)
 			else:
-				# return an error if the data is invalid
-				return JsonResponse({'error': 'Invalid data.','messages':serial.error_messages}, status=400)
+				# return an error if the owner doesn't exist
+				return JsonResponse({'error': 'No owner found with that id.'}, status=400)
 		else:
-			# return an error if the owner doesn't exist
-			return JsonResponse({'error': 'No owner found with that id.'}, status=400)
+			# return an error if the user is not an admin
+			return JsonResponse({'error': 'You must be logged in as an admin to view this page.'}, status=401)
 	else:
 		# return an error if the request method is not POST
 		return JsonResponse({'error': 'This endpoint only accepts POST requests.'}, status=405)
@@ -88,30 +110,37 @@ def add(request):
 def edit(request, id):
 	# check if the request method is PUT
 	if request.method == 'PUT':
-		# get the request body and load as json
-		data = loads(request.body)
-		# check if the owner exists
-		if find_owner(data['owner']):
-			# convert dates to datetime objects
-			data = format(data)
-			# find the animal with the given id
-			animal = Animal.objects.filter(id=id)
-			# check if the animal exists
-			if animal:
-				serial = AnimalSerializer(data=data)
-				if serial.is_valid():
-					animal.update(**serial.validated_data)
+		# check for an authtoken in the request headers and whether the token exists
+		token = AuthToken.objects.filter(token=request.headers.get('authtoken', ''))
+		# check if the token exists (i.e. the user is logged in)
+		if token:
+			# get the request body and load as json
+			data = loads(request.body)
+			# check if the owner exists
+			if find_owner(data['owner']):
+				# convert dates to datetime objects
+				data = format(data)
+				# find the animal with the given id
+				animal = Animal.objects.filter(id=id)
+				# check if the animal exists
+				if animal:
+					serial = AnimalSerializer(data=data)
+					if serial.is_valid():
+						animal.update(**serial.validated_data)
+					else:
+						# return an error if the data is invalid
+						return JsonResponse({'error':'Invalid data.','messages':serial.error_messages}, status=400)
+					# return the id of the updated animal with a success message
+					return JsonResponse({"result":"success", 'id': animal[0].id}, safe=False, status=200)
 				else:
-					# return an error if the data is invalid
-					return JsonResponse({'error':'Invalid data.','messages':serial.error_messages}, status=400)
-				# return the id of the updated animal with a success message
-				return JsonResponse({"result":"success", 'id': animal[0].id}, safe=False, status=200)
+					# return an error if the animal doesn't exist
+					return JsonResponse({'error': 'No animal found with that id.'}, status=400)
 			else:
-				# return an error if the animal doesn't exist
-				return JsonResponse({'error': 'No animal found with that id.'}, status=400)
+				# return an error if the owner doesn't exist
+				return JsonResponse({'error': 'No owner found with that id.'}, status=400)
 		else:
-			# return an error if the owner doesn't exist
-			return JsonResponse({'error': 'No owner found with that id.'}, status=400)
+			# return an error if the user is not an admin
+			return JsonResponse({'error': 'You must be logged in as an admin to view this page.'}, status=401)
 	else:
 		# return an error if the request method is not PUT
 		return JsonResponse({'error': 'This endpoint only accepts PUT requests.'}, status=405)
@@ -123,17 +152,24 @@ def edit(request, id):
 def delete(request, id):
 	# check if the request method is DELETE
 	if request.method == 'DELETE':
-		# find the animal with the given id
-		animal = Animal.objects.filter(id=id)
-		# check if the animal exists
-		if animal:
-			# delete the animal
-			animal.delete()
-			# return a success message
-			return JsonResponse({'success': 'Animal deleted successfully.'}, status=200)
+		# check for an authtoken in the request headers and whether the token exists
+		token = AuthToken.objects.filter(token=request.headers.get('authtoken', ''))
+		# check if the token exists (i.e. the user is logged in)
+		if token:
+			# find the animal with the given id
+			animal = Animal.objects.filter(id=id)
+			# check if the animal exists
+			if animal:
+				# delete the animal
+				animal.delete()
+				# return a success message
+				return JsonResponse({'success': 'Animal deleted successfully.'}, status=200)
+			else:
+				# return an error if the animal doesn't exist
+				return JsonResponse({'error': 'No animal found with that id.'}, status=400)
 		else:
-			# return an error if the animal doesn't exist
-			return JsonResponse({'error': 'No animal found with that id.'}, status=400)
+			# return an error if the user is not an admin
+			return JsonResponse({'error': 'You must be logged in as an admin to view this page.'}, status=401)
 	else:
 		# return an error if the request method is not DELETE
 		return JsonResponse({'error': 'This endpoint only accepts DELETE requests.'}, status=405)
