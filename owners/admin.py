@@ -1,3 +1,4 @@
 from django.contrib import admin
-
-# Register your models here.
+from .models import Owner
+# register the Owner model from models.py
+admin.site.register(Owner)
