@@ -9,23 +9,15 @@ from hashlib import sha256
 def details(request, id):
 	# check if the request method is GET
 	if request.method == 'GET':
-		# get the user id and role from the session
-		session_id = request.session.get('user_id', None)
-		session_role = request.session.get('user_role', None)
-		# check if the user is logged in as an admin or the user with the given id
-		if session_id == id or session_role == 'admin':
-			# find the user with the given id
-			user = User.objects.filter(id=id)
-			# check if the user exists
-			if user:
-				# return the serialized user data
-				return JsonResponse({'id': user[0].id, 'username': user[0].username, 'role': user[0].role}, status=200)
-			else:
-				# return an error if the user doesn't exist
-				return JsonResponse({'error': 'No user found with that id.'}, status=400)
+		# find the user with the given id
+		user = User.objects.filter(id=id)
+		# check if the user exists
+		if user:
+			# return the serialized user data
+			return JsonResponse({'id': user[0].id, 'username': user[0].username, 'role': user[0].role}, status=200)
 		else:
-			# return an error if the user is not logged in as an admin or the user with the given id
-			return JsonResponse({'error': 'You must be logged in as an admin or the user with the given id to view this page.'}, status=401)
+			# return an error if the user doesn't exist
+			return JsonResponse({'error': 'No user found with that id.'}, status=400)
 	else:
 		# return an error if the request method is not GET
 		return JsonResponse({'error': 'This endpoint only accepts GET requests.'}, status=405)
@@ -65,7 +57,7 @@ def login(request):
 @csrf_exempt
 def logout(request):
 	# check if the user is logged in
-	if request.session['logged_in']:
+	if request.session.get('logged_in', False) == True:
 		# log the user out
 		request.session.flush()
 		# return a success message
@@ -106,26 +98,18 @@ def register(request):
 def edit(request, id):
 	# check if the request method is PUT
 	if request.method == 'PUT':
-		# get the user id and role from the session
-		session_id = request.session.get('user_id', None)
-		session_role = request.session.get('user_role', None)
-		# check if the user is logged in as an admin or the user with the given id
-		if session_id == id or session_role == 'admin':
-			# get the request body and load as json
-			data = loads(request.body)
-			user = User.objects.filter(id=id)
-			# check if the user exists
-			if user:
-				# update the user
-				user.update(username=data['username'], password=hash(data['password']), role=data['role'])
-				# return the id and role of the updated user
-				return JsonResponse({"result":"success","data":{'id': user[0].id, 'role': user[0].role}}, safe=False, status=200)
-			else:
-				# return an error if the user doesn't exist
-				return JsonResponse({'error': 'No user found with that id.'}, status=400)
+		# get the request body and load as json
+		data = loads(request.body)
+		user = User.objects.filter(id=id)
+		# check if the user exists
+		if user.username == data['username'] and user.password == hash(data['old_password']):
+			# update the user
+			user.update(username=data['username'], password=hash(data['password']), role=data['role'])
+			# return the id and role of the updated user
+			return JsonResponse({"result":"success","data":{'id': user[0].id, 'role': user[0].role}}, safe=False, status=200)
 		else:
-			# return an error if the user is not logged in as an admin or the user with the given id
-			return JsonResponse({'error': 'You must be logged in as an admin or the user with the given id to view this page.'}, status=401)
+			# return an error if the user doesn't exist
+			return JsonResponse({'error': 'Incorrect credentials.'}, status=400)
 	else:
 		# return an error if the request method is not PUT
 		return JsonResponse({'error': 'This endpoint only accepts PUT requests.'}, status=405)
@@ -137,27 +121,19 @@ def edit(request, id):
 def delete(request, id):
 	# check if the request method is DELETE
 	if request.method == 'DELETE':
-		# get the user id and role from the session
-		session_id = request.session.get('user_id', None)
-		session_role = request.session.get('user_role', None)
-		# check if the user is logged in as an admin or the user with the given id
-		if session_id == id or session_role == 'admin':
-			# find the user with the given id
-			user = User.objects.filter(id=id)
-			# check if the user exists
-			if user:
-				# get the id of the user to be deleted
-				id = user[0].id
-				# delete the user
-				user.delete()
-				# return a success message
-				return JsonResponse({'result': 'success', 'id':id}, status=200)
-			else:
-				# return an error if the user doesn't exist
-				return JsonResponse({'error': 'No user found with that id.'}, status=400)
+		# find the user with the given id
+		user = User.objects.filter(id=id)
+		# check if the user exists
+		if user:
+			# get the id of the user to be deleted
+			id = user[0].id
+			# delete the user
+			user.delete()
+			# return a success message
+			return JsonResponse({'result': 'success', 'id':id}, status=200)
 		else:
-			# return an error if the user is not logged in as an admin or the user with the given id
-			return JsonResponse({'error': 'You must be logged in as an admin or the user with the given id to view this page.'}, status=401)
+			# return an error if the user doesn't exist
+			return JsonResponse({'error': 'No user found with that id.'}, status=400)
 	else:
 		# return an error if the request method is not DELETE
 		return JsonResponse({'error': 'This endpoint only accepts DELETE requests.'}, status=405)
