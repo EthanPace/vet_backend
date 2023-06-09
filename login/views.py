@@ -58,7 +58,7 @@ def login(request):
 			# kill any old tokens
 			time_to_live()
 			# return the id and role of the user
-			return JsonResponse({'result':'success', "id":user[0].id, "token":token}, status=200)
+			return JsonResponse({'result':'success', "id":user[0].id, "token":token, "role":user[0].role}, status=200)
 		else:
 			# return an error if the user doesn't exist
 			return JsonResponse({'error': 'No user found with that username and password.'}, status=400)
