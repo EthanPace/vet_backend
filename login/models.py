@@ -13,6 +13,7 @@ class AuthToken(models.Model):
 	token = models.CharField(max_length=50, unique=True, primary_key=True)
 	user_id = models.IntegerField()
 	user_role = models.CharField(max_length=50)
+	created = models.DateTimeField()
 	
 	def __str__(self):
 		return self.token

@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from datetime import datetime
+from datetime import datetime, timedelta
 from .models import User, AuthToken
 from json import loads
 from hashlib import sha256
@@ -12,7 +12,7 @@ def details(request, id):
 	# check if the request method is GET
 	if request.method == 'GET':
 		# check for an authtoken in the request headers and whether the token exists
-		token = AuthToken.objects.filter(token=request.headers.get('authtoken', ''))
+		token = AuthToken.objects.filter(token=request.headers.get('authtoken', '')).first()
 		# check if the token exists
 		if not token:
 			# return an error if the token doesn't exist
@@ -48,7 +48,14 @@ def login(request):
 		# check if the user exists
 		if user:
 			# log the user in by creating a new authtoken
-			token = AuthToken.objects.create(token=generate_token(), user_id=user[0].id, user_role=user[0].role).token
+			token = AuthToken.objects.create(
+				token=generate_token(),
+				user_id=user[0].id,
+				user_role=user[0].role,
+				created=datetime.now()
+			).token
+			# kill any old tokens
+			time_to_live()
 			# return the id and role of the user
 			return JsonResponse({'result':'success', "id":user[0].id, "token":token}, status=200)
 		else:
@@ -70,6 +77,8 @@ def logout(request):
 		if token:
 			# delete the authtoken
 			token.delete()
+			# kill any old tokens
+			time_to_live()
 			# return a success message
 			return JsonResponse({'result': 'success'}, status=200)
 		else:
@@ -112,20 +121,20 @@ def edit(request, id):
 	# check if the request method is PUT
 	if request.method == 'PUT':
 		# check for an authtoken in the request headers
-		token = AuthToken.objects.filter(token=request.headers.get('authtoken', ''))
+		token = AuthToken.objects.filter(token=request.headers.get('authtoken', '')).first()
 		# check if the authtoken exists
 		if not token:
 			# return an error if the authtoken doesn't exist
 			return JsonResponse({'error': 'You must be logged in to edit a user.'}, status=401)
 		# check if the user is logged in as an admin or the user with the given id
-		if token[0].user_role == 'admin' or token[0].user_id == id:
+		if token.user_role == 'admin' or token.user_id == id:
 			# get the request body and load as json
 			data = loads(request.body)
 			user = User.objects.filter(id=id)
 			# check if the user exists
 			if user:
 				# update the user
-				user[0].update(username=data['username'], password=hash(data['password']), role=data['role'])
+				user.update(username=data['username'], password=hash(data['password']), role=data['role'])
 				# return the id and role of the updated user
 				return JsonResponse({"result":"success","data":{'id': user[0].id, 'role': user[0].role}}, safe=False, status=200)
 			else:
@@ -154,11 +163,11 @@ def delete(request, id):
 		# check if the user is logged in as an admin or the user with the given id
 		if token[0].user_role == 'admin' or token[0].user_id == id:
 			# find the user with the given id
-			user = User.objects.filter(id=id)
+			user = User.objects.filter(id=id).first()
 			# check if the user exists
 			if user:
 				# get the id of the user to be deleted
-				id = user[0].id
+				id = user.id
 				# delete the user
 				user.delete()
 				# return a success message
@@ -183,4 +192,15 @@ def hash(password):
 # Generate a token for a user
 def generate_token():
 	# generate a token
-	return sha256((str(randint(99,1000000)) + str(datetime.now)).encode('utf-8')).hexdigest()
+	return sha256((str(randint(0,1000000)) + str(datetime.now)).encode('utf-8')).hexdigest()
+# Time to Live
+# Check if any token has expired
+def time_to_live():
+	# get all tokens
+	tokens = AuthToken.objects.all()
+	# loop through all tokens
+	for token in tokens:
+		# check if the token has expired
+		if token.created < datetime.now() + timedelta(minutes=2):
+			# delete the token
+			token.delete()
