@@ -5,6 +5,7 @@ from .models import User, AuthToken
 from json import loads
 from hashlib import sha256
 from random import randint
+from pytz import timezone
 # Details
 # Takes an id as part of the endpoint
 # Returns the full details of the user with the given id (except password)
@@ -52,7 +53,7 @@ def login(request):
 				token=generate_token(),
 				user_id=user[0].id,
 				user_role=user[0].role,
-				created=datetime.now()
+				created=datetime.now(timezone('Australia/Brisbane'))
 			).token
 			# kill any old tokens
 			time_to_live()
@@ -121,17 +122,24 @@ def edit(request, id):
 	# check if the request method is PUT
 	if request.method == 'PUT':
 		# check for an authtoken in the request headers
-		token = AuthToken.objects.filter(token=request.headers.get('authtoken', '')).first()
+		token = AuthToken.objects.filter(token=request.headers.get('authtoken', ''))
+		print (token)
+		print (request.headers.get('authtoken', ''))
 		# check if the authtoken exists
 		if not token:
 			# return an error if the authtoken doesn't exist
 			return JsonResponse({'error': 'You must be logged in to edit a user.'}, status=401)
 		# check if the user is logged in as an admin or the user with the given id
-		if token.user_role == 'admin' or token.user_id == id:
+		if token[0].user_role == 'admin' or token[0].user_id == id:
 			# get the request body and load as json
 			data = loads(request.body)
 			user = User.objects.filter(id=id)
 			# check if the user exists
+			print (user)
+			print (user[0].username)
+			print (data['username'])
+			print (user[0].password)
+			print (hash(data['old_password']))
 			if user[0].username == data['username'] and user[0].password == hash(data['old_password']):
 				# update the user
 				user.update(username=data['username'], password=hash(data['password']), role=data['role'])
@@ -192,7 +200,7 @@ def hash(password):
 # Generate a token for a user
 def generate_token():
 	# generate a token
-	return sha256((str(randint(0,1000000)) + str(datetime.now)).encode('utf-8')).hexdigest()
+	return hash((str(randint(0,1000000)) + str(datetime.now)))
 # Time to Live
 # Check if any token has expired
 def time_to_live():
@@ -201,6 +209,6 @@ def time_to_live():
 	# loop through all tokens
 	for token in tokens:
 		# check if the token has expired
-		if token.created < datetime.now() + timedelta(minutes=2):
+		if token.created > datetime.now(timezone('Australia/Brisbane')) + timedelta(hours=2):
 			# delete the token
 			token.delete()
