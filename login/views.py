@@ -118,14 +118,14 @@ def edit(request, id):
 			# return an error if the authtoken doesn't exist
 			return JsonResponse({'error': 'You must be logged in to edit a user.'}, status=401)
 		# check if the user is logged in as an admin or the user with the given id
-		if token.user_role == 'admin' or token.user_id == id:
+		if token[0].user_role == 'admin' or token[0].user_id == id:
 			# get the request body and load as json
 			data = loads(request.body)
 			user = User.objects.filter(id=id)
 			# check if the user exists
 			if user:
 				# update the user
-				user.update(username=data['username'], password=hash(data['password']), role=data['role'])
+				user[0].update(username=data['username'], password=hash(data['password']), role=data['role'])
 				# return the id and role of the updated user
 				return JsonResponse({"result":"success","data":{'id': user[0].id, 'role': user[0].role}}, safe=False, status=200)
 			else:
@@ -152,7 +152,7 @@ def delete(request, id):
 			# return an error if the authtoken doesn't exist
 			return JsonResponse({'error': 'You must be logged in to delete a user.'}, status=401)
 		# check if the user is logged in as an admin or the user with the given id
-		if token.user_role == 'admin' or token.user_id == id:
+		if token[0].user_role == 'admin' or token[0].user_id == id:
 			# find the user with the given id
 			user = User.objects.filter(id=id)
 			# check if the user exists
