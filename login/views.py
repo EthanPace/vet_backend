@@ -102,9 +102,9 @@ def edit(request, id):
 		data = loads(request.body)
 		user = User.objects.filter(id=id)
 		# check if the user exists
-		if user.username == data['username'] and user.password == hash(data['old_password']):
+		if user[0].username == data['username'] and user[0].password == hash(data['old_password']):
 			# update the user
-			user[0].update(username=data['username'], password=hash(data['password']), role=data['role'])
+			user.update(username=data['username'], password=hash(data['password']), role=data['role'])
 			# return the id and role of the updated user
 			return JsonResponse({"result":"success","data":{'id': user[0].id, 'role': user[0].role}}, safe=False, status=200)
 		else:
