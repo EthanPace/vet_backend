@@ -132,14 +132,14 @@ def edit(request, id):
 			data = loads(request.body)
 			user = User.objects.filter(id=id)
 			# check if the user exists
-			if user:
+			if user[0].username == data['username'] and user[0].password == hash(data['old_password']):
 				# update the user
 				user.update(username=data['username'], password=hash(data['password']), role=data['role'])
 				# return the id and role of the updated user
 				return JsonResponse({"result":"success","data":{'id': user[0].id, 'role': user[0].role}}, safe=False, status=200)
 			else:
 				# return an error if the user doesn't exist
-				return JsonResponse({'error': 'No user found with that id.'}, status=400)
+				return JsonResponse({'error': 'Invalid Credentials'}, status=400)
 		else:
 			# return an error if the user is not logged in as an admin or the user with the given id
 			return JsonResponse({'error': 'You must be logged in as an admin or the user with the given id to view this page.'}, status=401)
