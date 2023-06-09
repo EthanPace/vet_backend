@@ -27,7 +27,15 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+# CORS Settings
+
 CORS_ORIGIN_ALLOW_ALL = True
+
+ACCESS_CONTROL_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authtoken',
+]
 
 # Application definition
 
