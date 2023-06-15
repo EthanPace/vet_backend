@@ -4,7 +4,7 @@ class Owner(models.Model):
 	id = models.AutoField(primary_key=True)
 	first_name = models.CharField(max_length=50)
 	last_name = models.CharField(max_length=50)
-	phone_number = models.IntegerField()
+	phone_number = models.CharField(max_length=20)
 	email = models.EmailField()
 	availability = models.CharField(max_length=255)
 
