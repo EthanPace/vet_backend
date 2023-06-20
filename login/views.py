@@ -135,11 +135,6 @@ def edit(request, id):
 			data = loads(request.body)
 			user = User.objects.filter(id=id)
 			# check if the user exists
-			print (user)
-			print (user[0].username)
-			print (data['username'])
-			print (user[0].password)
-			print (hash(data['old_password']))
 			if user[0].username == data['username'] and user[0].password == hash(data['old_password']):
 				# update the user
 				user.update(username=data['username'], password=hash(data['password']), role=data['role'])

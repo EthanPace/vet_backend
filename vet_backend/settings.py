@@ -27,6 +27,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+# SSL Settings
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 # CORS Settings
 
 CSRF_TRUSTED_ORIGINS = [
