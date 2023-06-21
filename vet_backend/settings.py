@@ -20,18 +20,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-d!%0uk8k3&h(8478fx(zjn#^=g(o_%#7q(v((72xu%fa=z4=@o'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+SECRET_KEY = 'xBH80Eud3gpZ87BkPsNrRXYT0NZydOW0ddlE3QFjLVq2FVtcMGlq6dAVLQI8ijECUtW0qsWur2JSFtQHgCV5gH6pogjuuLZL0jU3qcgitYUJCfAFhK59qut7lyXcXdJEca9NhjPJojzBvUzukadr4JMqZOhrcy6cB8kHuXOTrMSD4etGlIiOs1a5htgoeblmw3DRF0Ell0c23TRPyd6xSCoNecSQXtin2ETpXcTOzDbzETFo0ZHFhT9Bn9ldEGvenoHuVSY9PjQnB9N08xJt6fAa9h9V0qy3pjaOhJKtMMzTIp1Frjnh13MeMajSdSkp'
 
 ALLOWED_HOSTS = ['*']
 
 # SSL Settings
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+SECURE_HSTS_SECONDS = 3600
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
 
 # CORS Settings
+CSRF_COOKIE_SECURE = True
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',
